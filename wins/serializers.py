@@ -32,6 +32,8 @@ class CustomerResponseSerializer(serializers.ModelSerializer):
 
 class WinSerializer(serializers.ModelSerializer):
 
+    id = serializers.CharField(read_only=True)
+
     class Meta(object):
         model = Win
         fields = (
@@ -72,7 +74,7 @@ class WinSerializer(serializers.ModelSerializer):
 
 
 class BreakdownSerializer(serializers.ModelSerializer):
-    
+
     class Meta(object):
         model = Breakdown
         fields = (
@@ -84,7 +86,7 @@ class BreakdownSerializer(serializers.ModelSerializer):
 
 
 class AdvisorSerializer(serializers.ModelSerializer):
-    
+
     class Meta(object):
         model = Advisor
         fields = (

@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django_countries.fields import CountryField
 
@@ -14,6 +16,7 @@ class Win(models.Model):
         verbose_name = "Export Win"
         verbose_name_plural = "Export Wins"
 
+    id = models.UUIDField(primary_key=True)
     company_name = models.CharField(max_length=128)
     cdms_reference = models.CharField(
         max_length=128, verbose_name="Company's CDMS Reference")
@@ -79,6 +82,11 @@ class Win(models.Model):
     )
     location = models.CharField(max_length=128)
     created = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.id = str(uuid.uuid4())
+        models.Model.save(self, *args, **kwargs)
 
 
 class Breakdown(models.Model):
