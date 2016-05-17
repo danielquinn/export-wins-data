@@ -17,6 +17,7 @@ class UserFactory(factory.Factory):
 
 
 class WinFactory(factory.Factory):
+
     class Meta(object):
         model = Win
 
@@ -43,6 +44,36 @@ class AlicePermissionTestCase(TestCase):
     WINS_SCHEMA = "{}schema/".format(reverse("drf:win-list"))
     WINS_LIST = reverse("drf:win-list")
     WINS_DETAIL = reverse("drf:win-detail", kwargs={"pk": 1})
+
+    POST_SAMPLE = {
+      "cdms_reference": "cdms reference",
+      "company_name": "company name",
+      "country": "AF",
+      "created": "2016-05-17T12:44:48.021705Z",
+      "customer_email_address": "no@way.ca",
+      "customer_job_title": "customer job title",
+      "customer_location": 3,
+      "customer_name": "customer name",
+      "date": "1979-06-01",
+      "description": "asdlkjskdlfkjlsdjkl",
+      "goods_vs_services": 1,
+      "has_hvo_specialist_involvement": True,
+      "hq_team": "hq team, region, or post",
+      "hvo_programme": 1,
+      "is_e_exported": True,
+      "is_line_manager_confirmed": True,
+      "is_personally_confirmed": True,
+      "is_prosperity_fund_related": True,
+      "lead_officer_name": "lead officer name",
+      "line_manager_name": "line manager name",
+      "location": "Edinburgh, UK",
+      "sector": 1,
+      "team_type": 1,
+      "total_expected_export_value": 5,
+      "total_expected_non_export_value": 5,
+      "type": 1,
+      "type_of_support_1": 1,
+    }
 
     def setUp(self):
 
@@ -171,10 +202,9 @@ class AlicePermissionTestCase(TestCase):
     def test_post_pass(self):
         auth = {
             "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
-            "HTTP_X_SIGNATURE": "3890a6c0dfaaf2afa5e8bf284f4398f833009d9014edf"
-                                "986b856c89c979d0cbe",
+            "HTTP_X_SIGNATURE": "how-do-i-get-this-signature?",
         }
-        data = {}
+        data = self.POST_SAMPLE
         with self.settings(UI_SECRET="secret"):
             response = self.client.post(self.WINS_LIST, data, **auth)
         self.assertEqual(response.status_code, 201)
