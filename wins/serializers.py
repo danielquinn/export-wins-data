@@ -5,9 +5,12 @@ from .models import Win, Breakdown, Advisor, CustomerResponse
 
 class CustomerResponseSerializer(serializers.ModelSerializer):
 
+    win_id = serializers.CharField(source="win__pk")
+
     class Meta(object):
         model = CustomerResponse
         fields = (
+            "win_id",
             "access_to_contacts",
             "access_to_information",
             "improved_profile",
