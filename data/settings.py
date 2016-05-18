@@ -20,10 +20,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0_^dopt%nq3k1$2pm!pi6jo=3vji2k6^+x-7o2yw8nl@=w5_gu'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.getenv("DEBUG", False))
 
 ALLOWED_HOSTS = []
 
@@ -139,7 +139,7 @@ LOGIN_REDIRECT_URL = "/"
 
 
 # Application authorisation
-UI_SECRET = "I AM THE PUMPKIN KING!"
+UI_SECRET = os.getenv("UI_SECRET")
 
 # DRF
 REST_FRAMEWORK = {

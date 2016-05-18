@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+#
+# A simple wrapper to make starting up the various development instances easier
+#
+
+if [[ ${1} = "ui" ]]; then
+
+    export SECRET_KEY='3s-c=0((s$x)g#$g2j+&t$#h_%*f%)6swnu1v8grv&qlid+__('
+    export DEBUG="1"
+    export UI_SECRET="secret"
+    export DATA_SERVER="http://localhost:8002"
+    /home/daniel/.virtualenvs/exportwins/bin/python ./ui/manage.py runserver localhost:8001
+
+elif [[ ${1} = "data" ]]; then
+
+    export SECRET_KEY="0_^dopt%nq3k1$2pm!pi6jo=3vji2k6^+x-7o2yw8nl@=w5_gu"
+    export DEBUG="1"
+    export UI_SECRET="secret"
+    /home/daniel/.virtualenvs/exportwins/bin/python ./data/manage.py runserver localhost:8002
+
+elif [[ ${1} = "admin" ]]; then
+
+    /home/daniel/.virtualenvs/exportwins/bin/python ./admin/manage.py runserver localhost:8003
+
+else
+
+    echo -e "\n\n  You sure you know what you're doing?\n"
+    echo -e "  Usage:\n    ./developer <ui|data|admin>\n\n"
+
+fi
