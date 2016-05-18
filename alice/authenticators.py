@@ -15,24 +15,21 @@ class AlicePermission(IsAuthenticated):
 
     def has_permission(self, request, view):
 
-        self.logger.debug(
-            "{} to {}".format(request.method, request.get_full_path()))
-
         if view.action == "schema":
             if self._test_signature(request):
-                self.logger.debug("OK: schema & signature")
+                self.logger.debug("  OK: schema & signature")
                 return True
 
         if not IsAuthenticated.has_permission(self, request, view):
-            self.logger.debug("Not authenticated: {}".format(
+            self.logger.debug("  Not authenticated: {}".format(
                 request.META.get("Authorization")))
             return False
 
         if self._test_signature(request):
-            self.logger.debug("OK: signature")
+            self.logger.debug("  OK: signature")
             return True
 
-        self.logger.debug("Bad signature")
+        self.logger.debug("  Bad signature")
 
         return False
 
@@ -44,6 +41,6 @@ class AlicePermission(IsAuthenticated):
         body = request.body
         generated = sha256(path + body + salt).hexdigest()
 
-        self.logger.debug("{} vs. {}".format(generated, offered))
+        self.logger.debug("  {} vs. {}".format(generated, offered))
 
         return generated == offered
