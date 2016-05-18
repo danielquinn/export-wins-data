@@ -1,4 +1,6 @@
 from datetime import date
+from hashlib import sha256
+
 import factory
 import json
 
@@ -39,11 +41,44 @@ class WinFactory(factory.Factory):
     country = "CA"
 
 
-class AlicePermissionTestCase(TestCase):
+class AliceClient(Client):
+    """
+    Typically, requests need to have a signature added and the Django client
+    class doesn't exactly make that easy.
+    """
+    
+    SIG_KEY = "HTTP_X_SIGNATURE"
+    SECRET = "secret"
 
-    WINS_SCHEMA = "{}schema/".format(reverse("drf:win-list"))
-    WINS_LIST = reverse("drf:win-list")
-    WINS_DETAIL = reverse("drf:win-detail", kwargs={"pk": 1})
+    def generic(self, method, path, data='',
+                content_type='application/octet-stream', secure=False,
+                **extra):
+
+        # This is the only part that isn't copypasta from Client.post
+        if self.SIG_KEY not in extra:
+            extra[self.SIG_KEY] = self._generate_signature(path, data)
+
+        return Client.generic(
+            self,
+            method,
+            path,
+            data=data,
+            content_type=content_type,
+            secure=secure,
+            **extra
+        )
+
+    def _generate_signature(self, path, post_data):
+        path = bytes(path, "utf-8")
+        body = post_data
+        secret = bytes(self.SECRET, "utf-8")
+        if isinstance(body, str):
+            body = bytes(body, "utf-8")
+
+        return sha256(path + body + secret).hexdigest()
+
+
+class AlicePermissionTestCase(TestCase):
 
     POST_SAMPLE = {
       "cdms_reference": "cdms reference",
@@ -78,6 +113,7 @@ class AlicePermissionTestCase(TestCase):
     def setUp(self):
 
         self.client = Client()
+        self.alice_client = AliceClient()
 
         self.user = UserFactory.create()
         self.superuser = UserFactory.create(is_superuser=True, email="a@b.c")
@@ -89,51 +125,47 @@ class AlicePermissionTestCase(TestCase):
         self.user_token = Token.objects.create(user=self.user)
         self.superuser_token = Token.objects.create(user=self.superuser)
 
-        WinFactory.create().save()
+        self.win = WinFactory.create()
+        self.win.save()
+        
+        self.wins_schema = "{}schema/".format(reverse("drf:win-list"))
+        self.wins_list = reverse("drf:win-list")
+        self.wins_detail = reverse(
+            "drf:win-detail", kwargs={"pk": self.win.pk})
 
     # GET Schema --------------------------------------------------------------
 
     def test_get_schema_pass(self):
 
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(
-                self.WINS_SCHEMA,
-                HTTP_X_SIGNATURE="f340fc87b8a521e6bd7ba1186af54871eab1e45e35b9"
-                                 "f96720c2b9911b231803"
-            )
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(self.wins_schema)
 
         content = json.loads(str(response.content, "utf-8"))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(content["id"]["label"], "ID")
+        self.assertEqual(content["id"]["label"], "Id")
 
     def test_get_schema_fail(self):
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_SCHEMA)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.client.get(self.wins_schema)
         self.assertEqual(response.status_code, 401)
 
     # GET List ----------------------------------------------------------------
 
     def test_get_list_pass(self):
-        auth = {
-            "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
-            "HTTP_X_SIGNATURE": "1e76bd6dc832dde1bf824726f00d5261c685b644adddb"
-                                "3c2738a535a088ac77a",
-        }
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_LIST, **auth)
+        auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(self.wins_list, **auth)
         self.assertEqual(response.status_code, 200)
 
     def test_get_list_fail(self):
-        auth = {
-        }
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(reverse("drf:win-list"), **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(reverse("drf:win-list"))
         self.assertEqual(response.status_code, 401)
 
     def test_get_list_fail_no_signature(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_LIST, **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.client.get(self.wins_list, **auth)
         self.assertEqual(response.status_code, 403)
 
     def test_get_list_fail_bad_signature(self):
@@ -141,42 +173,32 @@ class AlicePermissionTestCase(TestCase):
             "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
             "HTTP_X_SIGNATURE": "bad-signature",
         }
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_LIST, **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(self.wins_list, **auth)
         self.assertEqual(response.status_code, 403)
 
     def test_get_list_fail_no_auth(self):
-        auth = {
-            "HTTP_X_SIGNATURE": "1e76bd6dc832dde1bf824726f00d5261c685b644adddb"
-                                "3c2738a535a088ac77a",
-        }
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_LIST, **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(self.wins_list)
         self.assertEqual(response.status_code, 401)
 
     # GET Detail --------------------------------------------------------------
 
     def test_get_detail_pass(self):
-        auth = {
-            "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
-            "HTTP_X_SIGNATURE": "3890a6c0dfaaf2afa5e8bf284f4398f833009d9014edf"
-                                "986b856c89c979d0cbe",
-        }
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_DETAIL, **auth)
+        auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(self.wins_detail, **auth)
         self.assertEqual(response.status_code, 200)
 
     def test_get_detail_fail(self):
-        auth = {
-        }
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_DETAIL, **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(self.wins_detail)
         self.assertEqual(response.status_code, 401)
 
     def test_get_detail_fail_no_signature(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_DETAIL, **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.client.get(self.wins_detail, **auth)
         self.assertEqual(response.status_code, 403)
 
     def test_get_detail_fail_bad_signature(self):
@@ -184,29 +206,22 @@ class AlicePermissionTestCase(TestCase):
             "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
             "HTTP_X_SIGNATURE": "bad-signature",
         }
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_DETAIL, **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(self.wins_detail, **auth)
         self.assertEqual(response.status_code, 403)
 
     def test_get_detail_fail_no_auth(self):
-        auth = {
-            "HTTP_X_SIGNATURE": "1e76bd6dc832dde1bf824726f00d5261c685b644adddb"
-                                "3c2738a535a088ac77a",
-        }
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.get(self.WINS_DETAIL, **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.get(self.wins_detail)
         self.assertEqual(response.status_code, 401)
 
     # POST --------------------------------------------------------------------
 
     def test_post_pass(self):
-        auth = {
-            "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
-            "HTTP_X_SIGNATURE": "how-do-i-get-this-signature?",
-        }
+        auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
         data = self.POST_SAMPLE
-        with self.settings(UI_SECRET="secret"):
-            response = self.client.post(self.WINS_LIST, data, **auth)
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.post(self.wins_list, data, **auth)
         self.assertEqual(response.status_code, 201)
 
     def test_post_fail_no_auth(self):
