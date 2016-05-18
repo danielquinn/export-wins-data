@@ -225,19 +225,61 @@ class AlicePermissionTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_post_fail_no_auth(self):
-        pass
+        data = self.POST_SAMPLE
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.post(self.wins_list, data)
+        self.assertEqual(response.status_code, 401)
 
     def test_post_fail_bad_auth(self):
-        pass
+        auth = {"HTTP_AUTHORIZATION": "Token bad-auth"}
+        data = self.POST_SAMPLE
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.post(self.wins_list, data, **auth)
+        self.assertEqual(response.status_code, 401)
 
     def test_post_fail_no_signature(self):
-        pass
+        auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
+        data = self.POST_SAMPLE
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.client.post(self.wins_list, data, **auth)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_fail_bad_signature(self):
-        pass
+        auth = {
+            "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
+            "HTTP_X_SIGNATURE": "bad-signature"
+        }
+        data = self.POST_SAMPLE
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.post(self.wins_list, data, **auth)
+        self.assertEqual(response.status_code, 403)
 
     def test_post_fail_no_data(self):
-        pass
+        auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.post(self.wins_list, {}, **auth)
+        self.assertEqual(response.status_code, 400)
+
+        content = json.loads(str(response.content, "utf-8"))
+        self.assertTrue("customer_email_address" in content)
+        self.assertEqual(
+            content["customer_email_address"],
+            ["This field is required."]
+        )
 
     def test_post_fail_bad_data(self):
-        pass
+
+        auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
+
+        data = self.POST_SAMPLE.copy()
+        data["customer_email_address"] = "not an email address"
+        with self.settings(UI_SECRET=AliceClient.SECRET):
+            response = self.alice_client.post(self.wins_list, data, **auth)
+        self.assertEqual(response.status_code, 400)
+
+        content = json.loads(str(response.content, "utf-8"))
+        self.assertTrue("customer_email_address" in content)
+        self.assertEqual(
+            content["customer_email_address"],
+            ["Enter a valid email address."]
+        )
