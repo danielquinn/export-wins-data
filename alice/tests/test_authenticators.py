@@ -1,4 +1,3 @@
-from datetime import date
 from hashlib import sha256
 
 import factory
@@ -10,35 +9,11 @@ from django.core.urlresolvers import reverse
 from rest_framework.authtoken.models import Token
 
 from users.models import User
-from wins.models import Win
 
 
 class UserFactory(factory.Factory):
     class Meta(object):
         model = User
-
-
-class WinFactory(factory.Factory):
-
-    class Meta(object):
-        model = Win
-
-    customer_location = 1
-    type = 1
-    date = date(2016, 5, 17)
-    total_expected_export_value = 1
-    goods_vs_services = 1
-    total_expected_non_export_value = 1
-    sector = 1
-    is_prosperity_fund_related = True
-    hvo_programme = 1
-    has_hvo_specialist_involvement = True
-    is_e_exported = True
-    type_of_support_1 = 1
-    is_personally_confirmed = True
-    is_line_manager_confirmed = True
-    team_type = 1
-    country = "CA"
 
 
 class AliceClient(Client):
@@ -125,13 +100,11 @@ class AlicePermissionTestCase(TestCase):
         self.user_token = Token.objects.create(user=self.user)
         self.superuser_token = Token.objects.create(user=self.superuser)
 
-        self.win = WinFactory.create()
-        self.win.save()
-        
         self.wins_schema = reverse("drf:win-schema")
         self.wins_list = reverse("drf:win-list")
-        self.wins_detail = reverse(
-            "drf:win-detail", kwargs={"pk": self.win.pk})
+        self.wins_detail = reverse("drf:win-detail", kwargs={
+            "pk": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        })
 
     # GET Schema --------------------------------------------------------------
 
@@ -186,7 +159,7 @@ class AlicePermissionTestCase(TestCase):
     def test_get_detail_pass(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
         response = self.alice_client.get(self.wins_detail, **auth)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_detail_fail(self):
