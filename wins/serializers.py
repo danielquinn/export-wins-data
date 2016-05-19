@@ -76,6 +76,26 @@ class WinSerializer(serializers.ModelSerializer):
         )
 
 
+class LimitedWinSerializer(serializers.ModelSerializer):
+
+    id = serializers.CharField(read_only=True)
+
+    class Meta(object):
+        model = Win
+        fields = (
+            "id",
+            "description",
+            "type",
+            "date",
+            "country",
+            "customer_location",
+            "total_expected_export_value",
+            "total_expected_non_export_value",
+            "goods_vs_services",
+            "created",
+        )
+
+
 class BreakdownSerializer(serializers.ModelSerializer):
 
     class Meta(object):

@@ -1,11 +1,12 @@
 from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Win, Breakdown, Advisor, CustomerResponse
 from .serializers import (
-    WinSerializer, BreakdownSerializer, AdvisorSerializer, 
-    CustomerResponseSerializer
+    WinSerializer, LimitedWinSerializer, BreakdownSerializer,
+    AdvisorSerializer, CustomerResponseSerializer
 )
 
 from alice.views import AliceMixin
@@ -26,6 +27,16 @@ class WinViewSet(AliceMixin, ModelViewSet):
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
+
+
+class LimitedViewSet(WinViewSet):
+
+    serializer_class = LimitedWinSerializer
+    permission_classes = (AllowAny,)
+    http_method_names = ("get",)
+
+    def get_queryset(self):
+        return WinViewSet.get_queryset(self).filter(confirmation__isnull=True)
 
 
 class ConfirmationViewSet(AliceMixin, ModelViewSet):

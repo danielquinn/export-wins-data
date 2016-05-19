@@ -4,34 +4,13 @@ from hashlib import sha256
 
 from django.conf import settings
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
-class AlicePermission(IsAuthenticated):
+class SignatureMixin(object):
 
     def __init__(self):
-        IsAuthenticated.__init__(self)
         self.logger = logging.getLogger(__name__)
-
-    def has_permission(self, request, view):
-
-        if view.action == "schema":
-            if self._test_signature(request):
-                self.logger.debug("  OK: schema & signature")
-                return True
-
-        if not IsAuthenticated.has_permission(self, request, view):
-            self.logger.debug("  Not authenticated: {}".format(
-                request.META.get("Authorization")))
-            return False
-
-        if self._test_signature(request):
-            self.logger.debug("  OK: signature")
-            return True
-
-        self.logger.debug("  Bad signature")
-
-        return False
 
     def _test_signature(self, request):
 
@@ -74,3 +53,46 @@ class AlicePermission(IsAuthenticated):
             result |= x ^ y
 
         return result == 0
+
+
+class AlicePermission(SignatureMixin, IsAuthenticated):
+
+    def __init__(self):
+        SignatureMixin.__init__(self)
+        IsAuthenticated.__init__(self)
+
+    def has_permission(self, request, view):
+
+        if view.action == "schema":
+            if self._test_signature(request):
+                self.logger.debug("  OK: schema & signature")
+                return True
+
+        if not IsAuthenticated.has_permission(self, request, view):
+            self.logger.debug("  Not authenticated: {}".format(
+                request.META.get("Authorization")))
+            return False
+
+        if self._test_signature(request):
+            self.logger.debug("  OK: signature")
+            return True
+
+        self.logger.debug("  Bad signature")
+
+        return False
+
+
+class LimitedAlicePermission(SignatureMixin, AllowAny):
+
+    def __init__(self):
+        SignatureMixin.__init__(self)
+        AllowAny.__init__(self)
+
+    def has_object_permission(self, request, view, obj):
+        if request.method == "GET":
+            if self._test_signature(request):
+                return True
+        return False
+
+    def has_permission(self, request, view):
+        return False
