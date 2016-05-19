@@ -128,7 +128,7 @@ class AlicePermissionTestCase(TestCase):
         self.win = WinFactory.create()
         self.win.save()
         
-        self.wins_schema = "{}schema/".format(reverse("drf:win-list"))
+        self.wins_schema = reverse("drf:win-schema")
         self.wins_list = reverse("drf:win-list")
         self.wins_detail = reverse(
             "drf:win-detail", kwargs={"pk": self.win.pk})
