@@ -4,7 +4,7 @@ from hashlib import sha256
 import factory
 import json
 
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.core.urlresolvers import reverse
 
 from rest_framework.authtoken.models import Token
@@ -135,129 +135,127 @@ class AlicePermissionTestCase(TestCase):
 
     # GET Schema --------------------------------------------------------------
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_schema_pass(self):
-
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(self.wins_schema)
-
+        response = self.alice_client.get(self.wins_schema)
         content = json.loads(str(response.content, "utf-8"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["id"]["label"], "Id")
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_schema_fail(self):
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.client.get(self.wins_schema)
+        response = self.client.get(self.wins_schema)
         self.assertEqual(response.status_code, 401)
 
     # GET List ----------------------------------------------------------------
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_list_pass(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(self.wins_list, **auth)
+        response = self.alice_client.get(self.wins_list, **auth)
         self.assertEqual(response.status_code, 200)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_list_fail(self):
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(reverse("drf:win-list"))
+        response = self.alice_client.get(reverse("drf:win-list"))
         self.assertEqual(response.status_code, 401)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_list_fail_no_signature(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.client.get(self.wins_list, **auth)
+        response = self.client.get(self.wins_list, **auth)
         self.assertEqual(response.status_code, 403)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_list_fail_bad_signature(self):
         auth = {
             "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
             "HTTP_X_SIGNATURE": "bad-signature",
         }
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(self.wins_list, **auth)
+        response = self.alice_client.get(self.wins_list, **auth)
         self.assertEqual(response.status_code, 403)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_list_fail_no_auth(self):
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(self.wins_list)
+        response = self.alice_client.get(self.wins_list)
         self.assertEqual(response.status_code, 401)
 
     # GET Detail --------------------------------------------------------------
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_detail_pass(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(self.wins_detail, **auth)
+        response = self.alice_client.get(self.wins_detail, **auth)
         self.assertEqual(response.status_code, 200)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_detail_fail(self):
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(self.wins_detail)
+        response = self.alice_client.get(self.wins_detail)
         self.assertEqual(response.status_code, 401)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_detail_fail_no_signature(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.client.get(self.wins_detail, **auth)
+        response = self.client.get(self.wins_detail, **auth)
         self.assertEqual(response.status_code, 403)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_detail_fail_bad_signature(self):
         auth = {
             "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
             "HTTP_X_SIGNATURE": "bad-signature",
         }
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(self.wins_detail, **auth)
+        response = self.alice_client.get(self.wins_detail, **auth)
         self.assertEqual(response.status_code, 403)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_detail_fail_no_auth(self):
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.get(self.wins_detail)
+        response = self.alice_client.get(self.wins_detail)
         self.assertEqual(response.status_code, 401)
 
     # POST --------------------------------------------------------------------
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_post_pass(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
         data = self.POST_SAMPLE
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.post(self.wins_list, data, **auth)
+        response = self.alice_client.post(self.wins_list, data, **auth)
         self.assertEqual(response.status_code, 201)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_post_fail_no_auth(self):
         data = self.POST_SAMPLE
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.post(self.wins_list, data)
+        response = self.alice_client.post(self.wins_list, data)
         self.assertEqual(response.status_code, 401)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_post_fail_bad_auth(self):
         auth = {"HTTP_AUTHORIZATION": "Token bad-auth"}
         data = self.POST_SAMPLE
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.post(self.wins_list, data, **auth)
+        response = self.alice_client.post(self.wins_list, data, **auth)
         self.assertEqual(response.status_code, 401)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_post_fail_no_signature(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
         data = self.POST_SAMPLE
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.client.post(self.wins_list, data, **auth)
+        response = self.client.post(self.wins_list, data, **auth)
         self.assertEqual(response.status_code, 403)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_post_fail_bad_signature(self):
         auth = {
             "HTTP_AUTHORIZATION": "Token {}".format(self.user_token),
             "HTTP_X_SIGNATURE": "bad-signature"
         }
         data = self.POST_SAMPLE
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.post(self.wins_list, data, **auth)
+        response = self.alice_client.post(self.wins_list, data, **auth)
         self.assertEqual(response.status_code, 403)
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_post_fail_no_data(self):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.post(self.wins_list, {}, **auth)
+        response = self.alice_client.post(self.wins_list, {}, **auth)
         self.assertEqual(response.status_code, 400)
 
         content = json.loads(str(response.content, "utf-8"))
@@ -267,14 +265,14 @@ class AlicePermissionTestCase(TestCase):
             ["This field is required."]
         )
 
+    @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_post_fail_bad_data(self):
 
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
 
         data = self.POST_SAMPLE.copy()
         data["customer_email_address"] = "not an email address"
-        with self.settings(UI_SECRET=AliceClient.SECRET):
-            response = self.alice_client.post(self.wins_list, data, **auth)
+        response = self.alice_client.post(self.wins_list, data, **auth)
         self.assertEqual(response.status_code, 400)
 
         content = json.loads(str(response.content, "utf-8"))
