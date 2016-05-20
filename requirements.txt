@@ -7,6 +7,7 @@ django_extensions==1.6.7
 gunicorn==19.5.0
 dj-database-url==0.4.1
 psycopg2==2.6.1
+whitenoise==3.1
 
 # Tests
 factory-boy==2.7.0
