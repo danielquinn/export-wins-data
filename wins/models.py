@@ -27,7 +27,7 @@ class Win(models.Model):
     customer_location = models.PositiveIntegerField(choices=UK_REGIONS)
 
     description = models.TextField(
-        verbose_name="Brief description of win",
+        verbose_name="Describe the win",
         help_text="Describe the Win. What sort of business deal best "
                   "describes this Win? Include details of the contract or "
                   "order, what goods/services are included, the name of the "
@@ -42,18 +42,22 @@ class Win(models.Model):
     total_expected_export_value = models.IntegerField()
     goods_vs_services = models.PositiveIntegerField(
         choices=GOODS_VS_SERVICES,
-        verbose_name="Does the Export value relate to goods or services?"
+        verbose_name="Does the expected export value relate to goods or "
+                     "services?"
     )
     total_expected_non_export_value = models.IntegerField()
 
     sector = models.PositiveIntegerField(choices=SECTORS)
     is_prosperity_fund_related = models.BooleanField(
-        verbose_name="Prosperity fund related")
-    hvo_programme = models.PositiveIntegerField(
-        choices=HVO_PROGRAMMES, verbose_name="HVO Programme")
+        verbose_name="Is this win prosperity fund related")
+    hvo_programme = models.CharField(
+        max_length=6,
+        choices=HVO_PROGRAMMES,
+        verbose_name="HVO Programme, if applicable"
+    )
     has_hvo_specialist_involvement = models.BooleanField(
-        verbose_name="HVO Specialist involvement")
-    is_e_exported = models.BooleanField("E-Exporting")
+        verbose_name="Have HVO Specialists been involved")
+    is_e_exported = models.BooleanField("Does the win relate to e-exporting?")
 
     type_of_support_1 = models.PositiveIntegerField(choices=TYPES_OF_SUPPORT)
     type_of_support_2 = models.PositiveIntegerField(choices=TYPES_OF_SUPPORT,
@@ -73,7 +77,7 @@ class Win(models.Model):
                      "accurate"
     )
     is_line_manager_confirmed = models.BooleanField(
-        verbose_name="My line manager has seen and confirmed this information")
+        verbose_name="My line manager has confirmed this information")
 
     lead_officer_name = models.CharField(max_length=128)
     line_manager_name = models.CharField(max_length=128)

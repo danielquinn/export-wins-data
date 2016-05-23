@@ -69,7 +69,7 @@ class AlicePermissionTestCase(TestCase):
       "goods_vs_services": 1,
       "has_hvo_specialist_involvement": True,
       "hq_team": "hq team, region, or post",
-      "hvo_programme": 1,
+      "hvo_programme": "BSC-01",
       "is_e_exported": True,
       "is_line_manager_confirmed": True,
       "is_personally_confirmed": True,
@@ -193,7 +193,7 @@ class AlicePermissionTestCase(TestCase):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
         data = self.POST_SAMPLE
         response = self.alice_client.post(self.wins_list, data, **auth)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 201, response.content)
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_post_fail_no_auth(self):
