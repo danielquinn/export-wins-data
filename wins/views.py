@@ -3,10 +3,10 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Win, Breakdown, Advisor, CustomerResponse
+from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from .serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
-    AdvisorSerializer, CustomerResponseSerializer
+    AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
 )
 
 from alice.views import AliceMixin
@@ -37,6 +37,16 @@ class LimitedViewSet(WinViewSet):
 
     def get_queryset(self):
         return WinViewSet.get_queryset(self).filter(confirmation__isnull=True)
+
+
+class NotificationViewSet(AliceMixin, ModelViewSet):
+
+    model = Notification
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = (AllowAny,)
+    pagination_class = StandardPagination
+    http_method_names = ("post",)
 
 
 class ConfirmationViewSet(AliceMixin, ModelViewSet):

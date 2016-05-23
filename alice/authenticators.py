@@ -56,6 +56,10 @@ class SignatureMixin(object):
 
 
 class AlicePermission(SignatureMixin, IsAuthenticated):
+    """
+    Makes sure that the request is both authorised with a server key as well as
+    a user token.
+    """
 
     def __init__(self):
         SignatureMixin.__init__(self)
@@ -83,16 +87,17 @@ class AlicePermission(SignatureMixin, IsAuthenticated):
 
 
 class LimitedAlicePermission(SignatureMixin, AllowAny):
+    """
+    Use this for services that must be available to a client with a server key
+    but where we don't have any user data (or have no use for it).
+    """
 
     def __init__(self):
         SignatureMixin.__init__(self)
         AllowAny.__init__(self)
 
     def has_object_permission(self, request, view, obj):
-        if request.method == "GET":
-            if self._test_signature(request):
-                return True
-        return False
+        return self._test_signature(request)
 
     def has_permission(self, request, view):
-        return False
+        return self._test_signature(request)

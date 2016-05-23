@@ -205,3 +205,14 @@ class CustomerResponse(models.Model):
     comments = models.TextField(blank=True)
     name = models.CharField(max_length=256)
     created = models.DateTimeField(auto_now_add=True)
+
+
+class Notification(models.Model):
+
+    win = models.ForeignKey(Win)
+    recipient = models.EmailField()
+    created = models.DateTimeField(auto_now_add=True)
+
+    @classmethod
+    def send(cls, win, recipient):
+        cls.objects.create(win=win, recipient=recipient)

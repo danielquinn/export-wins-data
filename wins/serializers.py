@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Win, Breakdown, Advisor, CustomerResponse
+from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 
 
 class CustomerResponseSerializer(serializers.ModelSerializer):
@@ -117,4 +117,17 @@ class AdvisorSerializer(serializers.ModelSerializer):
             "team_type",
             "hq_team",
             "location"
+        )
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+
+    win_id = serializers.CharField(source="win__pk")
+
+    class Meta(object):
+        model = Notification
+        fields = (
+            "win_id",
+            "recipient",
+            "created"
         )
