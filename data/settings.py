@@ -144,12 +144,29 @@ LOGIN_REDIRECT_URL = "/"
 # Application authorisation
 UI_SECRET = os.getenv("UI_SECRET")
 
+
 # DRF
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.TokenAuthentication",
     )
 }
+
+
+# Mail stuffs
+NOREPLY = os.getenv("no-reply@exportwins.ukti.gov.uk")
+SENDING_ADDRESS = os.getenv("SENDING_ADDRESS")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = bool(os.getenv("EMAIL_USE_TLS"))
+EMAIL_USE_SSL = bool(os.getenv("EMAIL_USE_SSL"))
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT")) if os.getenv("EMAIL_TIMEOUT") else None
+EMAIL_SSL_KEYFILE = os.getenv("EMAIL_SSL_KEYFILE")
+EMAIL_SSL_CERTFILE = os.getenv("EMAIL_SSL_CERTFILE")
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")  # The default is just fine
+
 
 # Logging for development
 if DEBUG:
