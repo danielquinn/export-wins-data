@@ -56,6 +56,7 @@ class AliceClient(Client):
 class AlicePermissionTestCase(TestCase):
 
     POST_SAMPLE = {
+      "user": 1,
       "cdms_reference": "cdms reference",
       "company_name": "company name",
       "country": "AF",
