@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.core.mail import send_mail
+
 from rest_framework import serializers
 
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
@@ -41,6 +44,7 @@ class WinSerializer(serializers.ModelSerializer):
         model = Win
         fields = (
             "id",
+            "user",
             "company_name",
             "cdms_reference",
             "customer_name",
@@ -74,6 +78,9 @@ class WinSerializer(serializers.ModelSerializer):
             "location",
             "created",
         )
+
+    def validate_user(self, value):
+        return self.context["request"].user
 
 
 class LimitedWinSerializer(serializers.ModelSerializer):
@@ -122,12 +129,43 @@ class AdvisorSerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
 
-    win_id = serializers.CharField(source="win__pk")
+    recipient = serializers.EmailField(required=False)
 
     class Meta(object):
         model = Notification
         fields = (
-            "win_id",
+            "win",
+            "user",
             "recipient",
+            "type",
             "created"
+        )
+
+    @classmethod
+    def send_officer_email(cls, instance):
+
+        send_mail(
+            "Thank you for submitting a new Export Win.",
+            "We are contacting you to let you know that an Export Win you "
+            "recorded has been forwarded to {} of {} for confirmation.  If "
+            "you have experienced a problem with the new Export Wins service, "
+            "please contact us, giving brief details, at this address: "
+            "{}".format(
+                instance.win.customer_name,
+                instance.win.company_name,
+                settings.SENDING_ADDRESS
+            ),
+            settings.NOREPLY,
+            (instance.win.user.email,)
+        )
+
+    @classmethod
+    def send_customer_email(cls, request, instance):
+        send_mail(
+            "Subject Line!",
+            "Oh hai! You should click this:\n\n  {}".format(
+                request.POST.get("url")
+            ),
+            settings.NOREPLY,
+            (instance.win.customer_email_address,)
         )

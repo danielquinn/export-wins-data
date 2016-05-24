@@ -82,7 +82,6 @@ HVO_PROGRAMMES = (
   ("CHN-54", "CHN-54: Clean and Energy Efficient Production"),
   ("CHN-55", "CHN-55: Technology Giants in China"),
   ("CHN-56", "CHN-56: China Education"),
-  ("CHN-57", "CHN-57: China Experience Economy"),
   ("CHN-57", "CHN-57: China Maritime"),
   ("COL-02", "COL-02: Colombia Municipal infrastructure projects"),
   ("COL-03", "COL-03: Colombia Multiple transport projects"),

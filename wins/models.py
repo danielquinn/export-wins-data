@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from django_countries.fields import CountryField
 
+from users.models import User
 from .constants import (
     TYPES, UK_REGIONS, GOODS_VS_SERVICES, SECTORS, HVO_PROGRAMMES,
     TYPES_OF_SUPPORT, TEAMS, PROGRAMMES, RATINGS, WITHOUT_OUR_SUPPORT,
@@ -17,6 +18,7 @@ class Win(models.Model):
         verbose_name_plural = "Export Wins"
 
     id = models.UUIDField(primary_key=True)
+    user = models.ForeignKey(User, related_name="wins")
     company_name = models.CharField(max_length=128)
     cdms_reference = models.CharField(
         max_length=128, verbose_name="Company's CDMS Reference")
@@ -88,6 +90,9 @@ class Win(models.Model):
     )
     location = models.CharField(max_length=128)
     created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return "Export win {}".format(self.pk)
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -206,12 +211,32 @@ class CustomerResponse(models.Model):
     name = models.CharField(max_length=256)
     created = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return "Customer response to {}".format(self.win)
+
 
 class Notification(models.Model):
 
+    TYPE_OFFICER = "o"
+    TYPE_CUSTOMER = "c"
+    TYPES = (
+        (TYPE_OFFICER, "Officer"),
+        (TYPE_CUSTOMER, "Customer")
+    )
+
     win = models.ForeignKey(Win)
+    user = models.ForeignKey(
+        User, blank=True, null=True, related_name="notifications")
     recipient = models.EmailField()
+    type = models.CharField(max_length=1, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        if self.type == self.TYPE_OFFICER:
+            return "Officer notification to {} regarding {}".format(
+                self.user, self.win)
+        return "Customer notification to {} regarding {}".format(
+            self.recipient, self.win)
 
     @classmethod
     def send(cls, win, recipient):

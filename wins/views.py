@@ -48,6 +48,12 @@ class NotificationViewSet(AliceMixin, ModelViewSet):
     pagination_class = StandardPagination
     http_method_names = ("post",)
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        serializer.send_officer_email(instance)
+        serializer.send_customer_email(self.request, instance)
+        return instance
+
 
 class ConfirmationViewSet(AliceMixin, ModelViewSet):
 
