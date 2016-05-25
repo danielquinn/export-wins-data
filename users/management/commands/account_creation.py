@@ -1,5 +1,6 @@
 import argparse
 import bz2
+import csv
 import os
 import random
 import time
@@ -7,6 +8,8 @@ import time
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
+
+from ...models import User
 
 
 class Command(BaseCommand):
@@ -21,15 +24,25 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        for address in [a.strip() for a in options["users_file"].readlines()]:
+        for row in csv.reader(options["users_file"]):
+
+            if not row:
+                continue
+
+            name = row[0]
+            email = row[1]
             password = self._generate_password()
+
+            User.objects.create(name=name, email=email)
+
             send_mail(
-                "Subject line",
+                "Your account on Export Wins has been created",
                 "You can login with the following credentials:\n  Email: {}\n "
-                " Password: {}".format(address, password),
+                " Password: {}".format(email, password),
                 settings.SENDING_ADDRESS,
-                (address,)
+                (email,)
             )
+
             time.sleep(1)
 
     def _generate_password(self):
