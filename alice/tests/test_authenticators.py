@@ -10,47 +10,12 @@ from rest_framework.authtoken.models import Token
 
 from users.models import User
 
+from .client import AliceClient
+
 
 class UserFactory(factory.Factory):
     class Meta(object):
         model = User
-
-
-class AliceClient(Client):
-    """
-    Typically, requests need to have a signature added and the Django client
-    class doesn't exactly make that easy.
-    """
-    
-    SIG_KEY = "HTTP_X_SIGNATURE"
-    SECRET = "secret"
-
-    def generic(self, method, path, data='',
-                content_type='application/octet-stream', secure=False,
-                **extra):
-
-        # This is the only part that isn't copypasta from Client.post
-        if self.SIG_KEY not in extra:
-            extra[self.SIG_KEY] = self._generate_signature(path, data)
-
-        return Client.generic(
-            self,
-            method,
-            path,
-            data=data,
-            content_type=content_type,
-            secure=secure,
-            **extra
-        )
-
-    def _generate_signature(self, path, post_data):
-        path = bytes(path, "utf-8")
-        body = post_data
-        secret = bytes(self.SECRET, "utf-8")
-        if isinstance(body, str):
-            body = bytes(body, "utf-8")
-
-        return sha256(path + body + secret).hexdigest()
 
 
 class AlicePermissionTestCase(TestCase):
@@ -69,7 +34,7 @@ class AlicePermissionTestCase(TestCase):
       "description": "asdlkjskdlfkjlsdjkl",
       "goods_vs_services": 1,
       "has_hvo_specialist_involvement": True,
-      "hq_team": "hq team, region, or post",
+      "hq_team": "other:1",
       "hvo_programme": "BSC-01",
       "is_e_exported": True,
       "is_line_manager_confirmed": True,
@@ -79,7 +44,7 @@ class AlicePermissionTestCase(TestCase):
       "line_manager_name": "line manager name",
       "location": "Edinburgh, UK",
       "sector": 1,
-      "team_type": 1,
+      "team_type": "investment",
       "total_expected_export_value": 5,
       "total_expected_non_export_value": 5,
       "type": 1,
