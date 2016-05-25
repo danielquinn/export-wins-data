@@ -3,6 +3,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 
+from alice.authenticators import LimitedAlicePermission
+
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from .serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
@@ -32,26 +34,28 @@ class WinViewSet(AliceMixin, ModelViewSet):
 class LimitedViewSet(WinViewSet):
 
     serializer_class = LimitedWinSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (LimitedAlicePermission,)
     http_method_names = ("get",)
 
     def get_queryset(self):
         return WinViewSet.get_queryset(self).filter(confirmation__isnull=True)
 
 
-class NotificationViewSet(AliceMixin, ModelViewSet):
+class NotificationViewSet(ModelViewSet):
 
     model = Notification
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (LimitedAlicePermission,)
     pagination_class = StandardPagination
     http_method_names = ("post",)
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        serializer.send_officer_email(instance)
-        serializer.send_customer_email(self.request, instance)
+        if instance.type == Notification.TYPE_OFFICER:
+            serializer.send_officer_email(instance)
+        elif instance.type == Notification.TYPE_CUSTOMER:
+            serializer.send_customer_email(self.request, instance)
         return instance
 
 
