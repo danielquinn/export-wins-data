@@ -7,7 +7,7 @@ from users.models import User
 from .constants import (
     TYPES, GOODS_VS_SERVICES, SECTORS, HVO_PROGRAMMES,
     TYPES_OF_SUPPORT, TEAMS, PROGRAMMES, RATINGS, WITHOUT_OUR_SUPPORT,
-    EXPERIENCE, HQ_TEAM_REGION_OR_POST
+    EXPERIENCE, HQ_TEAM_REGION_OR_POST, UK_REGIONS
 )
 
 
@@ -19,14 +19,19 @@ class Win(models.Model):
 
     id = models.UUIDField(primary_key=True)
     user = models.ForeignKey(User, related_name="wins")
-    company_name = models.CharField(max_length=128)
+    company_name = models.CharField(
+        max_length=128, verbose_name="Organisation or company name")
     cdms_reference = models.CharField(
         max_length=128, verbose_name="Company's CDMS Reference")
 
-    customer_name = models.CharField(max_length=128)
+    customer_name = models.CharField(
+        max_length=128, verbose_name="Customer contact name")
     customer_job_title = models.CharField(max_length=128)
     customer_email_address = models.EmailField()
-    customer_location = models.PositiveIntegerField(choices=[])
+    customer_location = models.PositiveIntegerField(
+        choices=UK_REGIONS,
+        verbose_name="Customer or organisation HQ location"
+    )
 
     description = models.TextField(
         verbose_name="Describe the win",
@@ -84,7 +89,8 @@ class Win(models.Model):
         verbose_name="My line manager has confirmed this information")
 
     lead_officer_name = models.CharField(max_length=128)
-    line_manager_name = models.CharField(max_length=128)
+    line_manager_name = models.CharField(
+        max_length=128, verbose_name="Line manager's name")
     team_type = models.CharField(max_length=128, choices=TEAMS)
     hq_team = models.CharField(
         max_length=128,

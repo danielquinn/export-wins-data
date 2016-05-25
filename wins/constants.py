@@ -746,3 +746,19 @@ WITHOUT_OUR_SUPPORT = (
     (6, "81% - 99%"),
     (7, "All of it, the value would have been similar"),
 )
+
+# This is redundant, going 1:1 with HQ_TEAM_REGION_OR_POST above
+UK_REGIONS = (
+    (1, "East Midlands"),
+    (2, "East of England"),
+    (3, "London"),
+    (4, "North East"),
+    (5, "North West"),
+    (6, "Northern Ireland"),
+    (7, "Scotland"),
+    (8, "South East"),
+    (9, "South West"),
+    (10, "Wales"),
+    (11, "West Midlands"),
+    (12, "Yorkshire and The Humber"),
+)
