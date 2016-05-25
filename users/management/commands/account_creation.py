@@ -33,7 +33,9 @@ class Command(BaseCommand):
             email = row[1]
             password = self._generate_password()
 
-            User.objects.create(name=name, email=email)
+            u = User.objects.create(name=name, email=email)
+            u.set_password(password)
+            u.save()
 
             send_mail(
                 "Your account on Export Wins has been created",
