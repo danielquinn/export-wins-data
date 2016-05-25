@@ -155,7 +155,7 @@ class NotificationSerializer(serializers.ModelSerializer):
                 instance.win.company_name,
                 settings.SENDING_ADDRESS
             ),
-            settings.NOREPLY,
+            settings.SENDING_ADDRESS,
             (instance.win.user.email,)
         )
 
@@ -166,6 +166,6 @@ class NotificationSerializer(serializers.ModelSerializer):
             "Oh hai! You should click this:\n\n  {}".format(
                 request.POST.get("url")
             ),
-            settings.NOREPLY,
+            settings.SENDING_ADDRESS,
             (instance.win.customer_email_address,)
         )
