@@ -5,9 +5,9 @@ from django_countries.fields import CountryField
 
 from users.models import User
 from .constants import (
-    TYPES, UK_REGIONS, GOODS_VS_SERVICES, SECTORS, HVO_PROGRAMMES,
+    TYPES, GOODS_VS_SERVICES, SECTORS, HVO_PROGRAMMES,
     TYPES_OF_SUPPORT, TEAMS, PROGRAMMES, RATINGS, WITHOUT_OUR_SUPPORT,
-    EXPERIENCE
+    EXPERIENCE, HQ_TEAM_REGION_OR_POST
 )
 
 
@@ -26,7 +26,7 @@ class Win(models.Model):
     customer_name = models.CharField(max_length=128)
     customer_job_title = models.CharField(max_length=128)
     customer_email_address = models.EmailField()
-    customer_location = models.PositiveIntegerField(choices=UK_REGIONS)
+    customer_location = models.PositiveIntegerField(choices=[])
 
     description = models.TextField(
         verbose_name="Describe the win",
@@ -55,24 +55,26 @@ class Win(models.Model):
     hvo_programme = models.CharField(
         max_length=6,
         choices=HVO_PROGRAMMES,
-        verbose_name="HVO Programme, if applicable"
+        verbose_name="HVO Programme, if applicable",
+        blank=True,
+        null=True
     )
     has_hvo_specialist_involvement = models.BooleanField(
         verbose_name="Have HVO Specialists been involved")
     is_e_exported = models.BooleanField("Does the win relate to e-exporting?")
 
     type_of_support_1 = models.PositiveIntegerField(choices=TYPES_OF_SUPPORT)
-    type_of_support_2 = models.PositiveIntegerField(choices=TYPES_OF_SUPPORT,
-                                                    blank=True, null=True)
-    type_of_support_3 = models.PositiveIntegerField(choices=TYPES_OF_SUPPORT,
-                                                    blank=True, null=True)
+    type_of_support_2 = models.PositiveIntegerField(
+        choices=TYPES_OF_SUPPORT, blank=True, null=True)
+    type_of_support_3 = models.PositiveIntegerField(
+        choices=TYPES_OF_SUPPORT, blank=True, null=True)
 
-    associated_programme_1 = models.PositiveIntegerField(choices=PROGRAMMES,
-                                                         blank=True, null=True)
-    associated_programme_2 = models.PositiveIntegerField(choices=PROGRAMMES,
-                                                         blank=True, null=True)
-    associated_programme_3 = models.PositiveIntegerField(choices=PROGRAMMES,
-                                                         blank=True, null=True)
+    associated_programme_1 = models.PositiveIntegerField(
+        choices=PROGRAMMES, blank=True, null=True)
+    associated_programme_2 = models.PositiveIntegerField(
+        choices=PROGRAMMES, blank=True, null=True)
+    associated_programme_3 = models.PositiveIntegerField(
+        choices=PROGRAMMES, blank=True, null=True)
 
     is_personally_confirmed = models.BooleanField(
         verbose_name="I confirm that the information above is complete and "
@@ -83,10 +85,11 @@ class Win(models.Model):
 
     lead_officer_name = models.CharField(max_length=128)
     line_manager_name = models.CharField(max_length=128)
-    team_type = models.PositiveIntegerField(choices=TEAMS)
+    team_type = models.CharField(max_length=128, choices=TEAMS)
     hq_team = models.CharField(
         max_length=128,
-        verbose_name="HQ Team, Region or Post"
+        verbose_name="HQ Team, Region or Post",
+        choices=HQ_TEAM_REGION_OR_POST
     )
     location = models.CharField(max_length=128)
     created = models.DateTimeField(auto_now_add=True)
@@ -127,8 +130,12 @@ class Advisor(models.Model):
     """
 
     name = models.CharField(max_length=128)
-    team_type = models.PositiveIntegerField(choices=TEAMS)
-    hq_team = models.CharField(max_length=128)
+    team_type = models.CharField(max_length=128, choices=TEAMS)
+    hq_team = models.CharField(
+        max_length=128,
+        verbose_name="HQ Team, Region or Post",
+        choices=HQ_TEAM_REGION_OR_POST
+    )
     location = models.CharField(
         max_length=128, verbose_name="Location (if applicable)")
 
