@@ -33,14 +33,38 @@ class Command(BaseCommand):
             email = row[1]
             password = self._generate_password()
 
+            print("Sending mail to {}".format(name))
+
             u = User.objects.create(name=name, email=email)
             u.set_password(password)
             u.save()
 
             send_mail(
-                "Your account on Export Wins has been created",
-                "You can login with the following credentials:\n  Email: {}\n "
-                " Password: {}".format(email, password),
+                "Export Wins Login Credentials",
+                "Dear Colleague\n\nThank you for agreeing to test the new "
+                "Export Wins service.\n\nThis service is being developed with "
+                "feedback from live user testing. It will be delivered in two "
+                "parts: the first part is to be completed online by the Lead "
+                "Officer in UKTI or FCO who has helped the Customer deliver "
+                "the win. In the second part, the Customer will be sent an "
+                "email, inviting them to confirm the Export Win.\n\nInitially "
+                "we are only testing the functionality the first part of this "
+                "process. Your team will have the opportunity to comment on "
+                "the process that enables customers to confirm Export Wins "
+                "before we begin testing that part.\n\nThe service can be "
+                "accessed by copying and pasting the address below into your "
+                "internet browser, or by clicking on this link:\n\n  "
+                "https://www.exportwins.ukti.gov.uk/\n\n"
+                "You should login using these credentials:\n\n  Email: {}\n  "
+                "Password: {}\n\nIf you experience a problem accessing or "
+                "completing the form using the link above, please contact us "
+                "by email using the feedback button in the service or at:"
+                "\n\n  Email: ada.lovelace@ukti.gsi.gov.uk\n  Subject: Export "
+                "Wins Feedback\n\nBest Regards\n\n"
+                "The UKTI Digital Team".format(
+                    email,
+                    password
+                ),
                 settings.SENDING_ADDRESS,
                 (email,)
             )
