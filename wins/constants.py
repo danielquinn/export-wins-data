@@ -7,6 +7,8 @@
 # weapons.  If you're comfortable with your helping DSO being on your
 # conscience, then by all means, you can enable that here.  It's on you.
 
+from django_countries import countries
+
 EXPERIENCE = (
     (1, "Not yet exporting"),
     (2, "Last 12 months"),
@@ -535,7 +537,7 @@ TEAMS = (
     ("post", "Overseas Post"),  # There's nothing for this?
 )
 
-HQ_TEAM_REGION_OR_POST = (
+HQ_TEAM_REGION_OR_POST = tuple([
 
     ("team:1", "TD - Events - Financial & Professional Business Services"),
     ("team:2", "TD - Events - Education"),
@@ -716,7 +718,7 @@ HQ_TEAM_REGION_OR_POST = (
     ("region:11", "West Midlands"),
     ("region:12", "Yorkshire and The Humber"),
 
-)
+] + sorted([("post:{}".format(c[0]), str(c[1])) for c in countries.countries.items()], key=lambda x: x[1]))  # Attach standard countries list
 
 TYPES = (
     (1, "Export Win"),
