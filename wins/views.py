@@ -1,9 +1,8 @@
 from rest_framework import filters
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import ModelViewSet
 
-from alice.authenticators import LimitedAlicePermission
+from alice.authenticators import SignatureOnlyAlicePermission
 
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from .serializers import (
@@ -31,14 +30,21 @@ class WinViewSet(AliceMixin, ModelViewSet):
     http_method_names = ("get", "post")
 
 
-class LimitedViewSet(WinViewSet):
+class LimitedWinViewSet(WinViewSet):
 
     serializer_class = LimitedWinSerializer
-    permission_classes = (LimitedAlicePermission,)
+    permission_classes = (SignatureOnlyAlicePermission,)
     http_method_names = ("get",)
 
     def get_queryset(self):
-        return WinViewSet.get_queryset(self).filter(confirmation__isnull=True)
+
+        if "pk" not in self.kwargs:
+            return WinViewSet.get_queryset(self).none()
+
+        return WinViewSet.get_queryset(self).filter(
+            pk=self.kwargs["pk"],
+            confirmation__isnull=True
+        )
 
 
 class NotificationViewSet(ModelViewSet):
@@ -46,7 +52,7 @@ class NotificationViewSet(ModelViewSet):
     model = Notification
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    permission_classes = (LimitedAlicePermission,)
+    permission_classes = (SignatureOnlyAlicePermission,)
     pagination_class = StandardPagination
     http_method_names = ("post",)
 
