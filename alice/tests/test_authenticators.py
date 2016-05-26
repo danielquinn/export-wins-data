@@ -1,5 +1,3 @@
-from hashlib import sha256
-
 import factory
 import json
 
