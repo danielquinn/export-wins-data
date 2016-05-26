@@ -6,36 +6,6 @@ from rest_framework import serializers
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 
 
-class CustomerResponseSerializer(serializers.ModelSerializer):
-
-    win_id = serializers.CharField(source="win__pk")
-
-    class Meta(object):
-        model = CustomerResponse
-        fields = (
-            "win_id",
-            "access_to_contacts",
-            "access_to_information",
-            "improved_profile",
-            "gained_confidence",
-            "developed_relationships",
-            "overcame_problem",
-            "involved_state_enterprise",
-            "interventions_were_prerequisite",
-            "support_improved_speed",
-            "expected_portion_without_help",
-            "last_export",
-            "company_was_at_risk_of_not_exporting",
-            "has_explicit_export_plans",
-            "has_enabled_expansion_into_new_market",
-            "has_increased_exports_as_percent_of_turnover",
-            "has_enabled_expansion_into_existing_market",
-            "comments",
-            "name",
-            "created",
-        )
-
-
 class WinSerializer(serializers.ModelSerializer):
 
     id = serializers.CharField(read_only=True)
@@ -86,6 +56,10 @@ class WinSerializer(serializers.ModelSerializer):
 class LimitedWinSerializer(serializers.ModelSerializer):
 
     id = serializers.CharField(read_only=True)
+    type = serializers.CharField(source="get_type_display")
+    country = serializers.CharField(source="country.name")
+    customer_location = serializers.CharField(source="get_customer_location_display")
+    goods_vs_services = serializers.CharField(source="get_goods_vs_services_display")
 
     class Meta(object):
         model = Win
@@ -168,4 +142,34 @@ class NotificationSerializer(serializers.ModelSerializer):
             ),
             settings.SENDING_ADDRESS,
             (instance.win.customer_email_address,)
+        )
+
+
+class CustomerResponseSerializer(serializers.ModelSerializer):
+
+    # win_id = serializers.CharField(source="win_id")
+
+    class Meta(object):
+        model = CustomerResponse
+        fields = (
+            "win",
+            "access_to_contacts",
+            "access_to_information",
+            "improved_profile",
+            "gained_confidence",
+            "developed_relationships",
+            "overcame_problem",
+            "involved_state_enterprise",
+            "interventions_were_prerequisite",
+            "support_improved_speed",
+            "expected_portion_without_help",
+            "last_export",
+            "company_was_at_risk_of_not_exporting",
+            "has_explicit_export_plans",
+            "has_enabled_expansion_into_new_market",
+            "has_increased_exports_as_percent_of_turnover",
+            "has_enabled_expansion_into_existing_market",
+            "comments",
+            "name",
+            "created",
         )
