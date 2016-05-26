@@ -29,8 +29,8 @@ class Command(BaseCommand):
             if not row:
                 continue
 
-            name = row[0]
-            email = row[1]
+            name = row[0].strip()
+            email = row[1].strip().lower()
             password = self._generate_password()
 
             print("Sending mail to {}".format(name))
