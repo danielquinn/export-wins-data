@@ -5,11 +5,12 @@ from rest_framework.routers import DefaultRouter
 
 from wins.views import (
     WinViewSet, BreakdownViewSet, AdvisorViewSet, ConfirmationViewSet,
-    NotificationViewSet
+    NotificationViewSet, LimitedWinViewSet
 )
 
 router = DefaultRouter()
 router.register(r"wins", WinViewSet)
+router.register(r"limited-wins", LimitedWinViewSet)
 router.register(r"confirmations", ConfirmationViewSet)
 router.register(r"breakdowns", BreakdownViewSet)
 router.register(r"advisors", AdvisorViewSet)

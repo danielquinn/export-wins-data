@@ -86,7 +86,7 @@ class AlicePermission(SignatureMixin, IsAuthenticated):
         return False
 
 
-class LimitedAlicePermission(SignatureMixin, AllowAny):
+class SignatureOnlyAlicePermission(SignatureMixin, AllowAny):
     """
     Use this for services that must be available to a client with a server key
     but where we don't have any user data (or have no use for it).
