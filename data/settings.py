@@ -27,7 +27,8 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.getenv("DEBUG", False))
 
-# as app is running behind a host based router supplied by Heroku or other PaaS, we can open ALLOWED_HOSTS
+# As app is running behind a host-based router supplied by Heroku or other
+# PaaS, we can open ALLOWED_HOSTS
 ALLOWED_HOSTS = ['*']
 
 
@@ -42,14 +43,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    "django_extensions",
+    "raven.contrib.django.raven_compat",
+
     "wins.apps.WinsConfig",
     "users.apps.UsersConfig",
 
     "rest_framework",
     "rest_framework.authtoken",
     "crispy_forms",
-
-    "django_extensions",
 
 ]
 
@@ -154,6 +156,7 @@ REST_FRAMEWORK = {
 
 
 # Mail stuffs
+
 SENDING_ADDRESS = os.getenv("SENDING_ADDRESS")
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
@@ -167,6 +170,15 @@ EMAIL_SSL_CERTFILE = os.getenv("EMAIL_SSL_CERTFILE")
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 
+
+# Sentry
+
+RAVEN_CONFIG = {
+    "dsn": os.getenv("SENTRY_DSN"),
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    # 'release': raven.fetch_git_sha(os.path.dirname(__file__)),
+}
 
 # Logging for development
 if DEBUG:
@@ -183,15 +195,10 @@ if DEBUG:
                 'level': 'DEBUG',
                 'class': 'logging.StreamHandler',
             },
-            'mail_admins': {
-                'level': 'ERROR',
-                'filters': ['require_debug_false'],
-                'class': 'django.utils.log.AdminEmailHandler'
-            }
         },
         'loggers': {
             'django.request': {
-                'handlers': ['console', 'mail_admins'],
+                'handlers': ['console'],
                 'level': 'ERROR',
                 'propagate': True,
             },
