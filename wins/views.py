@@ -1,5 +1,7 @@
 from rest_framework import filters
+from rest_framework.decorators import list_route
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from alice.authenticators import SignatureOnlyAlicePermission
@@ -67,15 +69,21 @@ class NotificationViewSet(ModelViewSet):
         return instance
 
 
-class ConfirmationViewSet(AliceMixin, ModelViewSet):
+class ConfirmationViewSet(ModelViewSet):
 
     model = CustomerResponse
     queryset = CustomerResponse.objects.all()
     serializer_class = CustomerResponseSerializer
     pagination_class = StandardPagination
+    permission_classes = (SignatureOnlyAlicePermission,)
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
+
+    @list_route(methods=("get",))
+    def schema(self, request):
+        return Response(
+            self.metadata_class().get_serializer_info(self.get_serializer()))
 
 
 class BreakdownViewSet(AliceMixin, ModelViewSet):
