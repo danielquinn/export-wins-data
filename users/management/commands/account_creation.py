@@ -7,7 +7,7 @@ import time
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from ...models import User
 
@@ -19,12 +19,32 @@ class Command(BaseCommand):
         self.words = self._get_words()
 
     def add_arguments(self, parser):
-        parser.add_argument("users_file", type=argparse.FileType('r'))
+        parser.add_argument("--from-file", type=argparse.FileType('r'))
+        parser.add_argument("--name", type=str)
+        parser.add_argument("--email", type=str)
 
     def handle(self, *args, **options):
-        for row in csv.reader(options["users_file"]):
-            if row:
-                self._handle_row(row)
+
+        if options["from_file"]:
+            for row in csv.reader(options["from_file"]):
+                if row:
+                    self._handle_row(row)
+            return
+
+        if not options["name"] or not options["email"]:
+            raise CommandError(
+                "Either --from-file or a combination of --name and --email "
+                "are required"
+            )
+
+        password = self._generate_password()
+        self._create_user(
+            options["name"].strip(),
+            options["email"].strip().lower(),
+            password
+        )
+
+        self.stdout.write("Your new password is \"{}\"".format(password))
 
     def _handle_row(self, row):
 
@@ -32,11 +52,10 @@ class Command(BaseCommand):
         email = row[1].strip().lower()
         password = self._generate_password()
 
-        print("Sending mail to {}".format(name))
+        self.stdout.write("Sending mail to {}".format(name))
 
-        u = User.objects.create(name=name, email=email)
-        u.set_password(password)
-        u.save()
+        self._create_user(name, email, password)
+        self.send(email, password)
 
     @staticmethod
     def send(email, password):
@@ -94,3 +113,10 @@ class Command(BaseCommand):
         path = os.path.join(settings.BASE_DIR, "users", "words.bz2")
         with bz2.open(path) as f:
             return [str(w.strip(), "utf-8") for w in f.readlines()]
+
+    @staticmethod
+    def _create_user(name, email, password):
+        user = User.objects.create(name=name, email=email)
+        user.set_password(password)
+        user.save()
+        return user
