@@ -39,3 +39,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_username(self):
         return self.email
+
+
+class LoginFailure(models.Model):
+
+    email = models.EmailField()
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __str__(self):
+        return "{} at {}".format(self.email, self.created)

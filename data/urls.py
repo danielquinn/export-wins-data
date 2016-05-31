@@ -1,8 +1,8 @@
 from django.conf.urls import url, include
 
-from rest_framework.authtoken import views
 from rest_framework.routers import DefaultRouter
 
+from users.views import LoggingObtainAuthToken
 from wins.views import (
     WinViewSet, BreakdownViewSet, AdvisorViewSet, ConfirmationViewSet,
     NotificationViewSet, LimitedWinViewSet
@@ -18,6 +18,6 @@ router.register(r"notifications", NotificationViewSet)
 
 urlpatterns = [
     url(r"^", include(router.urls, namespace="drf")),
-    url(r'^login/', views.obtain_auth_token),
+    url(r'^login/', LoggingObtainAuthToken.as_view()),
     url(r"^auth/", include('rest_framework.urls', namespace="rest_framework")),
 ]
