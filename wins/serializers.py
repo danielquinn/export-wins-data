@@ -147,8 +147,6 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 class CustomerResponseSerializer(serializers.ModelSerializer):
 
-    # win_id = serializers.CharField(source="win_id")
-
     class Meta(object):
         model = CustomerResponse
         fields = (
