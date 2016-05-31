@@ -10,7 +10,7 @@ from wins.views import (
 
 router = DefaultRouter()
 router.register(r"wins", WinViewSet)
-router.register(r"limited-wins", LimitedWinViewSet)
+router.register(r"limited-wins", LimitedWinViewSet, base_name="limited-win")
 router.register(r"confirmations", ConfirmationViewSet)
 router.register(r"breakdowns", BreakdownViewSet)
 router.register(r"advisors", AdvisorViewSet)
