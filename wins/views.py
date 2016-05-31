@@ -38,9 +38,11 @@ class LimitedWinViewSet(WinViewSet):
 
     def get_queryset(self):
 
+        # We only allow for specific wins to be queried here
         if "pk" not in self.kwargs:
             return WinViewSet.get_queryset(self).none()
 
+        # Limit records to wins that have not already been confirmed
         return WinViewSet.get_queryset(self).filter(
             pk=self.kwargs["pk"],
             confirmation__isnull=True
