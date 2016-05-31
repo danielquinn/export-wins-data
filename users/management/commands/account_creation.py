@@ -54,7 +54,11 @@ class Command(BaseCommand):
         if options["from_file"]:
             for row in csv.reader(options["from_file"]):
                 if row:
-                    self._handle_row(row)
+                    self._create_user(
+                        row[0].strip(),
+                        self._sanitise_email(row[1]),
+                        self._generate_password()
+                    )
             return
 
         password = self._generate_password()
@@ -68,15 +72,6 @@ class Command(BaseCommand):
         address = address.strip().lower()
         validate_email(address)
         return address
-
-    def _handle_row(self, row):
-
-        name = row[0].strip()
-        email = self._sanitise_email(row[1])
-        password = self._generate_password()
-
-        self.stdout.write("Sending mail to {}".format(name))
-        self._create_user(name, email, password)
 
     @staticmethod
     def send(email, password):
@@ -139,6 +134,7 @@ class Command(BaseCommand):
         user.save()
 
         if self.do_mail:
+            self.stdout.write("Sending mail to {}".format(name))
             self.send(email, password)
         else:
             self.stdout.write(
