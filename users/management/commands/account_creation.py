@@ -7,7 +7,8 @@ import time
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
+from django.core.validators import validate_email
 
 from ...models import User
 
@@ -18,25 +19,64 @@ class Command(BaseCommand):
         BaseCommand.__init__(self, *args, **kwargs)
         self.words = self._get_words()
 
+        self.do_mail = True
+
     def add_arguments(self, parser):
-        parser.add_argument("users_file", type=argparse.FileType('r'))
+
+        parser.add_argument("--name", type=str)
+        parser.add_argument("--email", type=str)
+        parser.add_argument(
+            "--from-file",
+            type=argparse.FileType('r'),
+            help='The path to a CSV file in the following format: '
+                 '"name","email".  This option is exclusive to use of --name '
+                 'and --email.'
+        )
+        parser.add_argument(
+            "--print",
+            action="store_true",
+            help="Don't generate and send email to the user.  Instead, just "
+                 "print out their username & password to stdout."
+        )
 
     def handle(self, *args, **options):
-        for row in csv.reader(options["users_file"]):
-            if row:
-                self._handle_row(row)
+
+        if not (options["name"] and options["email"]):
+            if not options["from_file"]:
+                raise CommandError(
+                    "Either --from-file or a combination of --name and "
+                    "--email are required"
+                )
+
+        if options["print"]:
+            self.do_mail = False
+
+        if options["from_file"]:
+            for row in csv.reader(options["from_file"]):
+                if row:
+                    self._handle_row(row)
+            return
+
+        password = self._generate_password()
+        self._create_user(
+            options["name"].strip(),
+            self._sanitise_email(options["email"]),
+            password
+        )
+
+    def _sanitise_email(self, address):
+        address = address.strip().lower()
+        validate_email(address)
+        return address
 
     def _handle_row(self, row):
 
         name = row[0].strip()
-        email = row[1].strip().lower()
+        email = self._sanitise_email(row[1])
         password = self._generate_password()
 
-        print("Sending mail to {}".format(name))
-
-        u = User.objects.create(name=name, email=email)
-        u.set_password(password)
-        u.save()
+        self.stdout.write("Sending mail to {}".format(name))
+        self._create_user(name, email, password)
 
     @staticmethod
     def send(email, password):
@@ -80,12 +120,9 @@ class Command(BaseCommand):
     def _generate_password(self):
         separator = random.choice(("-", ",", ".", "_"))
         return "{}{}{}{}{}{}{}".format(
-            random.choice(self.words),
-            separator,
-            random.choice(self.words),
-            separator,
-            random.choice(self.words),
-            separator,
+            random.choice(self.words), separator,
+            random.choice(self.words), separator,
+            random.choice(self.words), separator,
             random.choice(self.words),
         )
 
@@ -94,3 +131,20 @@ class Command(BaseCommand):
         path = os.path.join(settings.BASE_DIR, "users", "words.bz2")
         with bz2.open(path) as f:
             return [str(w.strip(), "utf-8") for w in f.readlines()]
+
+    def _create_user(self, name, email, password):
+
+        user = User.objects.create(name=name, email=email)
+        user.set_password(password)
+        user.save()
+
+        if self.do_mail:
+            self.send(email, password)
+        else:
+            self.stdout.write(
+                "\nThe credentials for {} are: \n"
+                "  Email:    {}\n"
+                "  Password: {}\n\n".format(name, email, password)
+            )
+
+        return user
