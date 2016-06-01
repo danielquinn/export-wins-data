@@ -52,23 +52,28 @@ class Command(BaseCommand):
             self.do_mail = False
 
         if options["from_file"]:
-            for row in csv.reader(options["from_file"]):
-                if row:
-                    self._create_user(
-                        row[0].strip(),
-                        self._sanitise_email(row[1]),
-                        self._generate_password()
-                    )
-            return
+            return self._handle_batch(options["from_file"])
 
-        password = self._generate_password()
+        return self._handle_single(options["name"], options["email"])
+
+    def _handle_batch(self, file_handle):
+        for row in csv.reader(file_handle):
+            if row:
+                self._create_user(
+                    row[0].strip(),
+                    self._sanitise_email(row[1]),
+                    self._generate_password()
+                )
+
+    def _handle_single(self, name, email):
         self._create_user(
-            options["name"].strip(),
-            self._sanitise_email(options["email"]),
-            password
+            name.strip(),
+            self._sanitise_email(email),
+            self._generate_password()
         )
 
-    def _sanitise_email(self, address):
+    @staticmethod
+    def _sanitise_email(address):
         address = address.strip().lower()
         validate_email(address)
         return address
