@@ -1,10 +1,9 @@
 from rest_framework import filters
 from rest_framework.decorators import list_route
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-
-from alice.authenticators import SignatureOnlyAlicePermission
 
 from .filters import CustomerResponseFilterSet
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
@@ -36,7 +35,7 @@ class WinViewSet(AliceMixin, ModelViewSet):
 class LimitedWinViewSet(WinViewSet):
 
     serializer_class = LimitedWinSerializer
-    permission_classes = (SignatureOnlyAlicePermission,)
+    permission_classes = (AllowAny,)
     http_method_names = ("get",)
 
     def get_queryset(self):
@@ -57,7 +56,7 @@ class NotificationViewSet(ModelViewSet):
     model = Notification
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    permission_classes = (SignatureOnlyAlicePermission,)
+    permission_classes = (AllowAny,)
     pagination_class = StandardPagination
     http_method_names = ("post",)
 
@@ -76,7 +75,7 @@ class ConfirmationViewSet(ModelViewSet):
     queryset = CustomerResponse.objects.all()
     serializer_class = CustomerResponseSerializer
     pagination_class = StandardPagination
-    permission_classes = (SignatureOnlyAlicePermission,)
+    permission_classes = (AllowAny,)
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
     filter_class = CustomerResponseFilterSet
     ordering_fields = ("pk",)
