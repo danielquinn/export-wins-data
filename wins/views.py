@@ -1,10 +1,8 @@
-from rest_framework import filters
 from rest_framework.decorators import list_route
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import DjangoFilterBackend, OrderingFilter
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import ModelViewSet
-
-from alice.authenticators import SignatureOnlyAlicePermission
 
 from .filters import CustomerResponseFilterSet
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
@@ -12,8 +10,21 @@ from .serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
     AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
 )
+from alice.authenticators import AlicePermission, SignatureOnlyAlicePermission
 
-from alice.views import AliceMixin
+
+class AliceMixin(object):
+    """
+    Mixin for ViewSets used by Alice clients which authenticate via Alice and
+    reflect on schema view.
+    """
+
+    permission_classes = (AlicePermission,)
+
+    @list_route(methods=("get",))
+    def schema(self, request):
+        return Response(
+            self.metadata_class().get_serializer_info(self.get_serializer()))
 
 
 class StandardPagination(PageNumberPagination):
@@ -28,7 +39,7 @@ class WinViewSet(AliceMixin, ModelViewSet):
     queryset = Win.objects.all()
     serializer_class = WinSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
 
@@ -77,7 +88,7 @@ class ConfirmationViewSet(ModelViewSet):
     serializer_class = CustomerResponseSerializer
     pagination_class = StandardPagination
     permission_classes = (SignatureOnlyAlicePermission,)
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = CustomerResponseFilterSet
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
@@ -94,7 +105,7 @@ class BreakdownViewSet(AliceMixin, ModelViewSet):
     queryset = Breakdown.objects.all()
     serializer_class = BreakdownSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
 
@@ -105,6 +116,6 @@ class AdvisorViewSet(AliceMixin, ModelViewSet):
     queryset = Advisor.objects.all()
     serializer_class = AdvisorSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
