@@ -6,6 +6,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from alice.authenticators import SignatureOnlyAlicePermission
 
+from .filters import CustomerResponseFilterSet
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from .serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
@@ -77,6 +78,7 @@ class ConfirmationViewSet(ModelViewSet):
     pagination_class = StandardPagination
     permission_classes = (SignatureOnlyAlicePermission,)
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_class = CustomerResponseFilterSet
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
 
