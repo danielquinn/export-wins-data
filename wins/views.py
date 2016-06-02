@@ -1,7 +1,8 @@
 from rest_framework.decorators import list_route
 from rest_framework.filters import DjangoFilterBackend, OrderingFilter
-from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from .filters import CustomerResponseFilterSet
@@ -10,27 +11,12 @@ from .serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
     AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
 )
-from alice.authenticators import AlicePermission, SignatureOnlyAlicePermission
-
-
-class AliceMixin(object):
-    """
-    Mixin for ViewSets used by Alice clients which authenticate via Alice and
-    reflect on schema view.
-    """
-
-    permission_classes = (AlicePermission,)
-
-    @list_route(methods=("get",))
-    def schema(self, request):
-        return Response(
-            self.metadata_class().get_serializer_info(self.get_serializer()))
+from alice.views import AliceMixin
 
 
 class StandardPagination(PageNumberPagination):
     page_size = 25
     page_size_query_param = "page-size"
-    max_page_size = 100000
 
 
 class WinViewSet(AliceMixin, ModelViewSet):
@@ -47,7 +33,7 @@ class WinViewSet(AliceMixin, ModelViewSet):
 class LimitedWinViewSet(WinViewSet):
 
     serializer_class = LimitedWinSerializer
-    permission_classes = (SignatureOnlyAlicePermission,)
+    permission_classes = (AllowAny,)
     http_method_names = ("get",)
 
     def get_queryset(self):
@@ -68,7 +54,7 @@ class NotificationViewSet(ModelViewSet):
     model = Notification
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    permission_classes = (SignatureOnlyAlicePermission,)
+    permission_classes = (AllowAny,)
     pagination_class = StandardPagination
     http_method_names = ("post",)
 
@@ -87,7 +73,7 @@ class ConfirmationViewSet(ModelViewSet):
     queryset = CustomerResponse.objects.all()
     serializer_class = CustomerResponseSerializer
     pagination_class = StandardPagination
-    permission_classes = (SignatureOnlyAlicePermission,)
+    permission_classes = (AllowAny,)
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = CustomerResponseFilterSet
     ordering_fields = ("pk",)

@@ -161,7 +161,7 @@ class AlicePermissionTestCase(TestCase):
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_get_schema_fail_bad_client(self, url):
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 400)
 
     def test_win_schema_fail_bad_client(self):
         self._test_get_schema_fail_bad_client(self.wins_schema)
@@ -190,7 +190,7 @@ class AlicePermissionTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_wins_get_list_pass(self):
-            self._test_get_list_pass(self.wins_list)
+        self._test_get_list_pass(self.wins_list)
 
     def test_customerresponse_get_list_pass(self):
         self._test_get_list_pass(self.customerresponses_list)
@@ -219,7 +219,7 @@ class AlicePermissionTestCase(TestCase):
     def _test_get_list_fail_no_signature(self, url):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
         response = self.client.get(url, **auth)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     def test_wins_get_list_fail_no_signature(self):
         self._test_get_list_fail_no_signature(self.wins_list)
@@ -240,7 +240,7 @@ class AlicePermissionTestCase(TestCase):
             "HTTP_X_SIGNATURE": "bad-signature",
         }
         response = self.alice_client.get(url, **auth)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     def test_wins_get_list_fail_bad_signature(self):
         self._test_get_list_fail_bad_signature(self.wins_list)
@@ -298,7 +298,7 @@ class AlicePermissionTestCase(TestCase):
     def _test_get_detail_fail_no_signature(self, url):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
         response = self.client.get(url, **auth)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     def test_wins_get_detail_fail_no_signature(self):
         self._test_get_detail_fail_no_signature(self.wins_detail)
@@ -319,7 +319,7 @@ class AlicePermissionTestCase(TestCase):
             "HTTP_X_SIGNATURE": "bad-signature",
         }
         response = self.alice_client.get(url, **auth)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     def test_wins_get_detail_fail_bad_signature(self):
         self._test_get_detail_fail_bad_signature(self.wins_detail)
@@ -428,7 +428,7 @@ class AlicePermissionTestCase(TestCase):
     def _test_post_fail_no_signature(self, url, data):
         auth = {"HTTP_AUTHORIZATION": "Token {}".format(self.user_token)}
         response = self.client.post(url, data, **auth)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     def test_wins_post_fail_no_signature(self):
         self._test_post_fail_no_signature(
@@ -467,7 +467,7 @@ class AlicePermissionTestCase(TestCase):
             "HTTP_X_SIGNATURE": "bad-signature"
         }
         response = self.alice_client.post(url, data, **auth)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     def test_wins_post_fail_bad_signature(self):
         self._test_post_fail_bad_signature(
