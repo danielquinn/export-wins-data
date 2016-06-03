@@ -14,6 +14,8 @@ from ...models import Win, CustomerResponse
 
 class Command(BaseCommand):
 
+    # A user attribute like should_be_ignored is probably better but this will
+    # do for now.
     EXCLUDED_IDS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
     def add_arguments(self, parser):
