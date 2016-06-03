@@ -1,10 +1,12 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
+from django.utils.timezone import now
+
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework import serializers
 
-from .models import LoginFailure
+from .models import User, LoginFailure
 
 
 class LoggingAuthTokenSerializer(AuthTokenSerializer):
@@ -27,7 +29,9 @@ class LoggingAuthTokenSerializer(AuthTokenSerializer):
             )
 
         try:
-            return AuthTokenSerializer.validate(self, attrs)
+            attrs = AuthTokenSerializer.validate(self, attrs)
+            User.objects.filter(pk=attrs["user"].pk).update(last_login=now())
+            return attrs
         except Exception as e:
             LoginFailure.objects.create(email=email)
             raise e
