@@ -1,5 +1,5 @@
-from rest_framework import filters
 from rest_framework.decorators import list_route
+from rest_framework.filters import DjangoFilterBackend, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -11,7 +11,6 @@ from .serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
     AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
 )
-
 from alice.views import AliceMixin
 
 
@@ -26,7 +25,7 @@ class WinViewSet(AliceMixin, ModelViewSet):
     queryset = Win.objects.all()
     serializer_class = WinSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
 
@@ -75,7 +74,7 @@ class ConfirmationViewSet(ModelViewSet):
     serializer_class = CustomerResponseSerializer
     pagination_class = StandardPagination
     permission_classes = (AllowAny,)
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_class = CustomerResponseFilterSet
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
@@ -92,7 +91,7 @@ class BreakdownViewSet(AliceMixin, ModelViewSet):
     queryset = Breakdown.objects.all()
     serializer_class = BreakdownSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
 
@@ -103,6 +102,6 @@ class AdvisorViewSet(AliceMixin, ModelViewSet):
     queryset = Advisor.objects.all()
     serializer_class = AdvisorSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")

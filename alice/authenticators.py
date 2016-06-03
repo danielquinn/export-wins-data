@@ -17,7 +17,7 @@ class AlicePermission(IsAuthenticated):
 
         if request.method in SAFE_METHODS:
             if view.action == "schema":
-                self.logger.debug("OK: schema & signature")
+                self.logger.debug("OK: schema")
                 return True
 
         if IsAuthenticated.has_permission(self, request, view):

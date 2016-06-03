@@ -4,9 +4,10 @@ from hashlib import sha256
 
 from django.conf import settings
 from django.http import HttpResponseBadRequest
+from django.utils.crypto import constant_time_compare
 
 
-class SignatureRejectionMiddleware:
+class SignatureRejectionMiddleware(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -14,45 +15,25 @@ class SignatureRejectionMiddleware:
     def process_request(self, request):
         if not self._test_signature(request):
             return HttpResponseBadRequest("PFO")
+        return None
+
+    def _generate_signature(self, secret, path, body):
+        salt = bytes(secret, "utf-8")
+        path = bytes(path, "utf-8")
+        return sha256(path + body + salt).hexdigest()
 
     def _test_signature(self, request):
-
         offered = request.META.get("HTTP_X_SIGNATURE")
 
         if not offered:
             return False
 
-        salt = bytes(settings.UI_SECRET, "utf-8")
-        path = bytes(request.get_full_path(), "utf-8")
-        body = request.body
-        generated = sha256(path + body + salt).hexdigest()
+        generated = self._generate_signature(
+            settings.UI_SECRET,
+            request.get_full_path(),
+            request.body,
+        )
 
         self.logger.debug("  {} vs. {}".format(generated, offered))
 
-        return self._strings_match(generated, offered)
-
-    @staticmethod
-    def _strings_match(a, b):
-        """
-        Constant time string comparison, mitigates side channel attacks.
-        See: https://github.com/kumar303/mohawk/blob/master/mohawk/util.py#L196
-        """
-
-        if len(a) != len(b):
-            return False
-
-        result = 0
-
-        def byte_ints(buffer):
-            for character in buffer:
-                # In Python 3, if we have a bytes object, iterating it will
-                # already get the integer value. In older pythons, we need
-                # to use ord().
-                if not isinstance(character, int):
-                    character = ord(character)
-                yield character
-
-        for x, y in zip(byte_ints(a), byte_ints(b)):
-            result |= x ^ y
-
-        return result == 0
+        return constant_time_compare(generated, offered)

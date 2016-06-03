@@ -5,6 +5,10 @@ from .authenticators import AlicePermission
 
 
 class AliceMixin(object):
+    """
+    Mixin for ViewSets used by Alice clients which authenticate via Alice and
+    reflect on schema view.
+    """
 
     permission_classes = (AlicePermission,)
 
