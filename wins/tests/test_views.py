@@ -386,7 +386,11 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_post_fail_bad_auth(self, url, data):
-        self.alice_client.login(username="not-a-user", password="fail")
+        self.alice_client.login(username="not-a-user", password="asdf")
+        response = self.alice_client.post(url, data)
+        self.assertEqual(response.status_code, 403)
+
+        self.alice_client.login(username=self.user.email, password="fail")
         response = self.alice_client.post(url, data)
         self.assertEqual(response.status_code, 403)
 
