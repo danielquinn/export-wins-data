@@ -237,7 +237,7 @@ class Notification(models.Model):
         (TYPE_CUSTOMER, "Customer")
     )
 
-    win = models.ForeignKey(Win)
+    win = models.ForeignKey(Win, related_name="notifications")
     user = models.ForeignKey(
         User, blank=True, null=True, related_name="notifications")
     recipient = models.EmailField()
