@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 
 from rest_framework.routers import DefaultRouter
 
-from users.views import LoggingObtainAuthToken
+from users.views import LoginView
 from wins.views import (
     WinViewSet, BreakdownViewSet, AdvisorViewSet, ConfirmationViewSet,
     NotificationViewSet, LimitedWinViewSet
@@ -17,7 +17,12 @@ router.register(r"advisors", AdvisorViewSet)
 router.register(r"notifications", NotificationViewSet)
 
 urlpatterns = [
+
     url(r"^", include(router.urls, namespace="drf")),
-    url(r'^login/', LoggingObtainAuthToken.as_view()),
+
+    # Override DRF's default 'cause ours skips CSRF
+    url(r"^auth/login/$", LoginView.as_view(), name="login"),
+
     url(r"^auth/", include('rest_framework.urls', namespace="rest_framework")),
+
 ]

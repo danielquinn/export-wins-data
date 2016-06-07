@@ -151,7 +151,7 @@ UI_SECRET = os.getenv("UI_SECRET")
 # DRF
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",
+        "alice.authentication.NoCSRFSessionAuthentication",
     )
 }
 
@@ -180,6 +180,7 @@ RAVEN_CONFIG = {
     # release based on the git info.
     # 'release': raven.fetch_git_sha(os.path.dirname(__file__)),
 }
+
 
 # Logging for development
 if DEBUG:
