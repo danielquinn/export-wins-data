@@ -175,13 +175,13 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_notification_list_not_allowed(self):
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.get(self.notifications_list)
         self.assertEqual(response.status_code, 405)
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_get_list_pass(self, url):
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.get(url)
         self.assertEqual(response.status_code, 200)
 
@@ -213,7 +213,7 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_get_list_fail_no_signature(self, url):
-        self.client.login(username=self.user.email, password="asdf")
+        self._login()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
@@ -234,7 +234,7 @@ class AlicePermissionTestCase(TestCase):
         auth = {
             "HTTP_X_SIGNATURE": "bad-signature",
         }
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.get(url, **auth)
         self.assertEqual(response.status_code, 400)
 
@@ -254,13 +254,13 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def test_get_notification_detail_not_allowed(self):
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.get(self.notifications_detail)
         self.assertEqual(response.status_code, 405)
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_get_detail_pass(self, url):
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.get(url)
         self.assertEqual(response.status_code, 404)
 
@@ -292,7 +292,7 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_get_detail_fail_no_signature(self, url):
-        self.client.login(username=self.user.email, password="asdf")
+        self._login()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
@@ -313,7 +313,7 @@ class AlicePermissionTestCase(TestCase):
         auth = {
             "HTTP_X_SIGNATURE": "bad-signature",
         }
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.get(url, **auth)
         self.assertEqual(response.status_code, 400)
 
@@ -333,7 +333,7 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_post_pass(self, url, data):
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.post(url, data)
         self.assertEqual(response.status_code, 201, response.content)
 
@@ -410,7 +410,7 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_post_fail_no_signature(self, url, data):
-        self.client.login(username=self.user.email, password="asdf")
+        self._login()
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 400)
 
@@ -449,7 +449,7 @@ class AlicePermissionTestCase(TestCase):
         auth = {
             "HTTP_X_SIGNATURE": "bad-signature"
         }
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.post(url, data, **auth)
         self.assertEqual(response.status_code, 400)
 
@@ -485,7 +485,7 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_post_fail_no_data(self, url, data, key):
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         response = self.alice_client.post(url, {})
         self.assertEqual(response.status_code, 400)
         content = json.loads(str(response.content, "utf-8"))
@@ -529,7 +529,7 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_post_fail_bad_data(self, url, data, key, error_msg):
-        self.alice_client.login(username=self.user.email, password="asdf")
+        self._login(signed=True)
         data[key] = 'not valid!'
         response = self.alice_client.post(url, data)
         self.assertEqual(response.status_code, 400)
@@ -577,3 +577,8 @@ class AlicePermissionTestCase(TestCase):
             '"not valid!" is not a valid choice.',
         )
 
+    def _login(self, signed=False):
+        if signed:
+            self.alice_client.login(username=self.user.email, password="asdf")
+        else:
+            self.client.login(username=self.user.email, password="asdf")
