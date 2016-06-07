@@ -7,7 +7,7 @@ from users.models import User
 from .constants import (
     TYPES, GOODS_VS_SERVICES, SECTORS, HVO_PROGRAMMES,
     TYPES_OF_SUPPORT, TEAMS, PROGRAMMES, RATINGS, WITHOUT_OUR_SUPPORT,
-    EXPERIENCE, HQ_TEAM_REGION_OR_POST, UK_REGIONS
+    EXPERIENCE, HQ_TEAM_REGION_OR_POST, UK_REGIONS, BUSINESS_TYPE
 )
 
 
@@ -33,12 +33,18 @@ class Win(models.Model):
         verbose_name="Customer or organisation HQ location"
     )
 
+    business_type = models.PositiveIntegerField(
+        choices=BUSINESS_TYPE, verbose_name="Business type")
+    name_of_customer = models.CharField(
+        max_length=128, verbose_name="Name of the overseas customer",
+    )
+    name_of_export = models.CharField(
+        max_length=128, verbose_name="Goods/services being exported",
+    )
+    # formerly a catch-all, since broken out into business_type,
+    # name_of_customer, name_of_export and description.
     description = models.TextField(
-        verbose_name="Describe the win",
-        help_text="Describe the Win. What sort of business deal best "
-                  "describes this Win? Include details of the contract or "
-                  "order, what goods/services are included, the name of the "
-                  "overseas customer and the support provided by UKTI/FCO."
+        verbose_name="How was the company supported in achieving this win",
     )
 
     type = models.PositiveIntegerField(
