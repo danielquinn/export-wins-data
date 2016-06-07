@@ -20,7 +20,7 @@ urlpatterns = [
 
     url(r"^", include(router.urls, namespace="drf")),
 
-    # Override DRF's default 'cause ours skips CSRF
+    # Override DRF's default 'cause our includes brute-force protection
     url(r"^auth/login/$", LoginView.as_view(), name="login"),
 
     url(r"^auth/", include('rest_framework.urls', namespace="rest_framework")),
