@@ -34,14 +34,15 @@ class Win(models.Model):
     )
 
     business_type = models.PositiveIntegerField(
-        choices=BUSINESS_TYPE, verbose_name="Business type")
+        choices=BUSINESS_TYPE, verbose_name="Business type"
+    )
     name_of_customer = models.CharField(
         max_length=128, verbose_name="Name of the overseas customer",
     )
     name_of_export = models.CharField(
         max_length=128, verbose_name="Goods/services being exported",
     )
-    # formerly a catch-all, since broken out into business_type,
+    # Formerly a catch-all, since broken out into business_type,
     # name_of_customer, name_of_export and description.
     description = models.TextField(
         verbose_name="How was the company supported in achieving this win",
