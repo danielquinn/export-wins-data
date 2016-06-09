@@ -62,8 +62,8 @@ class NotificationViewSet(ModelViewSet):
         instance = serializer.save()
         if instance.type == Notification.TYPE_OFFICER:
             serializer.send_officer_email(instance)
-        elif instance.type == Notification.TYPE_CUSTOMER:
-            serializer.send_customer_email(self.request, instance)
+        # elif instance.type == Notification.TYPE_CUSTOMER:
+        #     serializer.send_customer_email(self.request, instance)
         return instance
 
 
