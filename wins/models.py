@@ -12,6 +12,7 @@ from .constants import (
 
 
 class Win(models.Model):
+    """ Information about a given "export win", submitted by an officer """
 
     class Meta(object):
         verbose_name = "Export Win"
@@ -33,12 +34,22 @@ class Win(models.Model):
         verbose_name="Customer or organisation HQ location"
     )
 
+    business_type = models.CharField(
+        max_length=128,
+        verbose_name="What kind of business deal best describes this win?",
+    )
+    # Formerly a catch-all, since broken out into business_type,
+    # name_of_customer, name_of_export and description.
     description = models.TextField(
-        verbose_name="Describe the win",
-        help_text="Describe the Win. What sort of business deal best "
-                  "describes this Win? Include details of the contract or "
-                  "order, what goods/services are included, the name of the "
-                  "overseas customer and the support provided by UKTI/FCO."
+        verbose_name="How was the company supported in achieving this win",
+    )
+    name_of_customer = models.CharField(
+        max_length=128,
+        verbose_name="What is the name of their overseas customer?",
+    )
+    name_of_export = models.CharField(
+        max_length=128,
+        verbose_name=" What are the goods or services that are being exported?",
     )
 
     type = models.PositiveIntegerField(
@@ -56,7 +67,7 @@ class Win(models.Model):
 
     sector = models.PositiveIntegerField(choices=SECTORS)
     is_prosperity_fund_related = models.BooleanField(
-        verbose_name="Is this win prosperity fund related")
+        verbose_name="Is this win prosperity fund related?")
     hvo_programme = models.CharField(
         max_length=6,
         choices=HVO_PROGRAMMES,
@@ -65,7 +76,7 @@ class Win(models.Model):
         null=True
     )
     has_hvo_specialist_involvement = models.BooleanField(
-        verbose_name="Have HVO Specialists been involved")
+        verbose_name="Have HVO Specialists been involved?")
     is_e_exported = models.BooleanField("Does the win relate to e-exporting?")
 
     type_of_support_1 = models.PositiveIntegerField(choices=TYPES_OF_SUPPORT)
@@ -86,7 +97,7 @@ class Win(models.Model):
                      "accurate"
     )
     is_line_manager_confirmed = models.BooleanField(
-        verbose_name="My line manager has confirmed this information")
+        verbose_name="My line manager has confirmed the decision to record this win")
 
     lead_officer_name = models.CharField(max_length=128)
     line_manager_name = models.CharField(
@@ -110,6 +121,11 @@ class Win(models.Model):
 
 
 class Breakdown(models.Model):
+    """ Export/non-export value broken down by given year
+
+    Totals found in Win model as `total_expected_export_value` and
+    `total_expected_non_export_value`.
+    """
 
     TYPE_EXPORT = 1
     TYPE_NON_EXPORT = 2
@@ -147,6 +163,7 @@ class Advisor(models.Model):
 
 
 class CustomerResponse(models.Model):
+    """ Customer's response to being asked about an "export win" """
 
     win = models.OneToOneField(Win, related_name="confirmation")
 
