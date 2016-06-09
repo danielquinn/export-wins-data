@@ -44,8 +44,10 @@ class Command(BaseCommand):
                 win.customer_name, win.customer_email_address), ending=" ")
 
             send_mail(
-                "Subject line!",
+                "Congratulations from {} on your export business "
+                "success".format(win.user.name),
                 render_to_string("wins/email/customer-notification.email", {
+                    "win": win,
                     "url": "https://{}/wins/review/{}".format(
                         options["domain"],
                         win.pk
