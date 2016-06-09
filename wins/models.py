@@ -123,7 +123,7 @@ class Win(models.Model):
 class Breakdown(models.Model):
     """ Export/non-export value broken down by given year
 
-    Totals found in Win model as `total_expected_export_value` and
+    Totals found in win model as `total_expected_export_value` and
     `total_expected_non_export_value`.
     """
 
@@ -169,25 +169,25 @@ class CustomerResponse(models.Model):
 
     access_to_contacts = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Gained access to contacts not otherwise accessible"
+        verbose_name="Gained access to contacts not otherwise accessible?"
     )
     access_to_information = models.PositiveIntegerField(
         choices=RATINGS,
         verbose_name="Gained access to information or improved understanding "
-                     "of the country"
+                     "of the country?"
     )
     improved_profile = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Improved your profile or credibility in the country"
+        verbose_name="Improved your profile or credibility in the country?"
     )
     gained_confidence = models.PositiveIntegerField(
         choices=RATINGS,
         verbose_name="Gained the confidence to explore or expand in the "
-                     "country"
+                     "country?"
     )
     developed_relationships = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Developed and/or nurtured critical relationships"
+        verbose_name="Developed and/or nurtured critical relationships?"
     )
     overcame_problem = models.PositiveIntegerField(
         choices=RATINGS,
@@ -196,30 +196,30 @@ class CustomerResponse(models.Model):
     )
 
     involved_state_enterprise = models.BooleanField(
-        verbose_name="Did the Win involve a foreign government or state-owned "
+        verbose_name="Did the win involve a foreign government or state-owned "
                      "enterprise? (e.g. as a customer, an intermediary or "
                      "facilitator)"
     )
     interventions_were_prerequisite = models.BooleanField(
-        verbose_name="Were any of the interventions needed for this Win a "
+        verbose_name="Were any of the interventions needed for this win a "
                      "pre-requisite for the export value to be realised?"
     )
     support_improved_speed = models.BooleanField(
         verbose_name="Did our support or intervention(s) help you achieve "
-                     "this Win more quickly than you otherwise would have "
+                     "this win more quickly than you otherwise would have "
                      "done?"
     )
     expected_portion_without_help = models.PositiveIntegerField(
         choices=WITHOUT_OUR_SUPPORT,
         verbose_name="What proportion of the total expected export value of "
-                     "this Win would you have achieved without our support?"
+                     "this win would you have achieved without our support?"
     )
     last_export = models.PositiveIntegerField(
         choices=EXPERIENCE,
         verbose_name="When did your company last export goods and/or services?"
     )
     company_was_at_risk_of_not_exporting = models.BooleanField(
-        verbose_name="Prior to securing this Win, was your company at risk of "
+        verbose_name="Prior to securing this win, was your company at risk of "
                      "not exporting?"
     )
     has_explicit_export_plans = models.BooleanField(
@@ -227,14 +227,14 @@ class CustomerResponse(models.Model):
                      "months?"
     )
     has_enabled_expansion_into_new_market = models.BooleanField(
-        verbose_name="Has this Win enabled you to expand into a new market?"
+        verbose_name="Has this win enabled you to expand into a new market?"
     )
     has_increased_exports_as_percent_of_turnover = models.BooleanField(
-        verbose_name="Has this Win enabled you to increase exports as a % of "
+        verbose_name="Has this win enabled you to increase exports as a % of "
                      "your turnover?"
     )
     has_enabled_expansion_into_existing_market = models.BooleanField(
-        verbose_name="Has this Win enabled you to expand into an existing "
+        verbose_name="Has this win enabled you to expand into an existing "
                      "market?"
     )
     comments = models.TextField(blank=True)
