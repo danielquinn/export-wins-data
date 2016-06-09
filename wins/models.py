@@ -41,7 +41,7 @@ class Win(models.Model):
     # Formerly a catch-all, since broken out into business_type,
     # name_of_customer, name_of_export and description.
     description = models.TextField(
-        verbose_name="How was the company supported in achieving this win",
+        verbose_name="How was the company supported in achieving this win?",
     )
     name_of_customer = models.CharField(
         max_length=128,
@@ -67,7 +67,7 @@ class Win(models.Model):
 
     sector = models.PositiveIntegerField(choices=SECTORS)
     is_prosperity_fund_related = models.BooleanField(
-        verbose_name="Is this win prosperity fund related?")
+        verbose_name="Is this win Prosperity Fund related?")
     hvo_programme = models.CharField(
         max_length=6,
         choices=HVO_PROGRAMMES,
@@ -97,11 +97,25 @@ class Win(models.Model):
                      "accurate"
     )
     is_line_manager_confirmed = models.BooleanField(
-        verbose_name="My line manager has confirmed the decision to record this win")
+        verbose_name="My line manager has confirmed the decision to record "
+                     "this win"
+    )
 
-    lead_officer_name = models.CharField(max_length=128)
-    lead_officer_email_address = models.EmailField(blank=True)
-    other_official_email_address = models.EmailField(blank=True)
+    lead_officer_name = models.CharField(
+        max_length=128,
+        verbose_name="Lead officer's name",
+        help_text="This is the name that will be included in the email to the "
+                  "customer"
+    )
+
+    lead_officer_email_address = models.EmailField(
+        verbose_name="Lead officer's email address",
+        blank=True
+    )
+    other_official_email_address = models.EmailField(
+        verbose_name="Other officer's email address",
+        blank=True
+    )
     line_manager_name = models.CharField(
         max_length=128, verbose_name="Line manager's name")
     team_type = models.CharField(max_length=128, choices=TEAMS)
@@ -110,7 +124,7 @@ class Win(models.Model):
         verbose_name="HQ Team, Region or Post",
         choices=HQ_TEAM_REGION_OR_POST
     )
-    location = models.CharField(max_length=128)
+    location = models.CharField(max_length=128, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
