@@ -722,18 +722,6 @@ TYPES = (
     (3, "Mixed - Export and Non-Export Wins"),
 )
 
-BUSINESS_TYPE = (
-  (1, "Outward investment"),
-  (2, "Contract"),
-  (3, "Order"),
-  (4, "Export sales"),
-  (5, "Distributor"),
-  (6, "Tender/competition win"),
-  (7, "Joint venture"),
-  (8, "Other (TEMPORARY)"),
-
-)
-
 TYPES_OF_SUPPORT = (
     (1, "Market entry advice and support – UKTI/FCO in UK"),
     (2, "Missions, tradeshows and events (UKTI/FCO)"),
