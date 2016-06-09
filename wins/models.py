@@ -100,6 +100,8 @@ class Win(models.Model):
         verbose_name="My line manager has confirmed the decision to record this win")
 
     lead_officer_name = models.CharField(max_length=128)
+    lead_officer_email_address = models.EmailField(blank=True)
+    other_official_email_address = models.EmailField(blank=True)
     line_manager_name = models.CharField(
         max_length=128, verbose_name="Line manager's name")
     team_type = models.CharField(max_length=128, choices=TEAMS)
