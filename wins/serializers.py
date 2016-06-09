@@ -45,6 +45,8 @@ class WinSerializer(serializers.ModelSerializer):
             "is_personally_confirmed",
             "is_line_manager_confirmed",
             "lead_officer_name",
+            "lead_officer_email_address",
+            "other_official_email_address",
             "line_manager_name",
             "team_type",
             "hq_team",
