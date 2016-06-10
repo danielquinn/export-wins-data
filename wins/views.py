@@ -1,23 +1,22 @@
-from rest_framework import filters
+from rest_framework.decorators import list_route
+from rest_framework.filters import DjangoFilterBackend, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from alice.authenticators import LimitedAlicePermission
-
+from .filters import CustomerResponseFilterSet
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from .serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
     AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
 )
-
 from alice.views import AliceMixin
 
 
 class StandardPagination(PageNumberPagination):
     page_size = 25
     page_size_query_param = "page-size"
-    max_page_size = 100000
 
 
 class WinViewSet(AliceMixin, ModelViewSet):
@@ -26,19 +25,28 @@ class WinViewSet(AliceMixin, ModelViewSet):
     queryset = Win.objects.all()
     serializer_class = WinSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
 
 
-class LimitedViewSet(WinViewSet):
+class LimitedWinViewSet(WinViewSet):
 
     serializer_class = LimitedWinSerializer
-    permission_classes = (LimitedAlicePermission,)
+    permission_classes = (AllowAny,)
     http_method_names = ("get",)
 
     def get_queryset(self):
-        return WinViewSet.get_queryset(self).filter(confirmation__isnull=True)
+
+        # We only allow for specific wins to be queried here
+        if "pk" not in self.kwargs:
+            return WinViewSet.get_queryset(self).none()
+
+        # Limit records to wins that have not already been confirmed
+        return WinViewSet.get_queryset(self).filter(
+            pk=self.kwargs["pk"],
+            confirmation__isnull=True
+        )
 
 
 class NotificationViewSet(ModelViewSet):
@@ -46,7 +54,7 @@ class NotificationViewSet(ModelViewSet):
     model = Notification
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
-    permission_classes = (LimitedAlicePermission,)
+    permission_classes = (AllowAny,)
     pagination_class = StandardPagination
     http_method_names = ("post",)
 
@@ -59,15 +67,22 @@ class NotificationViewSet(ModelViewSet):
         return instance
 
 
-class ConfirmationViewSet(AliceMixin, ModelViewSet):
+class ConfirmationViewSet(ModelViewSet):
 
     model = CustomerResponse
     queryset = CustomerResponse.objects.all()
     serializer_class = CustomerResponseSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    permission_classes = (AllowAny,)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_class = CustomerResponseFilterSet
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
+
+    @list_route(methods=("get",))
+    def schema(self, request):
+        return Response(
+            self.metadata_class().get_serializer_info(self.get_serializer()))
 
 
 class BreakdownViewSet(AliceMixin, ModelViewSet):
@@ -76,7 +91,7 @@ class BreakdownViewSet(AliceMixin, ModelViewSet):
     queryset = Breakdown.objects.all()
     serializer_class = BreakdownSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
 
@@ -87,6 +102,6 @@ class AdvisorViewSet(AliceMixin, ModelViewSet):
     queryset = Advisor.objects.all()
     serializer_class = AdvisorSerializer
     pagination_class = StandardPagination
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")

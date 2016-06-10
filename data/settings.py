@@ -57,6 +57,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
+    'alice.middleware.SignatureRejectionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -150,13 +151,14 @@ UI_SECRET = os.getenv("UI_SECRET")
 # DRF
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",
+        "alice.authentication.NoCSRFSessionAuthentication",
     )
 }
 
 
 # Mail stuffs
 
+FEEDBACK_ADDRESS = os.getenv("FEEDBACK_ADDRESS")
 SENDING_ADDRESS = os.getenv("SENDING_ADDRESS")
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
@@ -179,6 +181,7 @@ RAVEN_CONFIG = {
     # release based on the git info.
     # 'release': raven.fetch_git_sha(os.path.dirname(__file__)),
 }
+
 
 # Logging for development
 if DEBUG:

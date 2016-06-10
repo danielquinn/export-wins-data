@@ -12,6 +12,7 @@ from .constants import (
 
 
 class Win(models.Model):
+    """ Information about a given "export win", submitted by an officer """
 
     class Meta(object):
         verbose_name = "Export Win"
@@ -33,12 +34,22 @@ class Win(models.Model):
         verbose_name="Customer or organisation HQ location"
     )
 
+    business_type = models.CharField(
+        max_length=128,
+        verbose_name="What kind of business deal best describes this win?",
+    )
+    # Formerly a catch-all, since broken out into business_type,
+    # name_of_customer, name_of_export and description.
     description = models.TextField(
-        verbose_name="Describe the win",
-        help_text="Describe the Win. What sort of business deal best "
-                  "describes this Win? Include details of the contract or "
-                  "order, what goods/services are included, the name of the "
-                  "overseas customer and the support provided by UKTI/FCO."
+        verbose_name="How was the company supported in achieving this win?",
+    )
+    name_of_customer = models.CharField(
+        max_length=128,
+        verbose_name="What is the name of their overseas customer?",
+    )
+    name_of_export = models.CharField(
+        max_length=128,
+        verbose_name=" What are the goods or services that are being exported?",
     )
 
     type = models.PositiveIntegerField(
@@ -56,7 +67,7 @@ class Win(models.Model):
 
     sector = models.PositiveIntegerField(choices=SECTORS)
     is_prosperity_fund_related = models.BooleanField(
-        verbose_name="Is this win prosperity fund related")
+        verbose_name="Is this win Prosperity Fund related?")
     hvo_programme = models.CharField(
         max_length=6,
         choices=HVO_PROGRAMMES,
@@ -65,7 +76,7 @@ class Win(models.Model):
         null=True
     )
     has_hvo_specialist_involvement = models.BooleanField(
-        verbose_name="Have HVO Specialists been involved")
+        verbose_name="Have HVO Specialists been involved?")
     is_e_exported = models.BooleanField("Does the win relate to e-exporting?")
 
     type_of_support_1 = models.PositiveIntegerField(choices=TYPES_OF_SUPPORT)
@@ -86,9 +97,25 @@ class Win(models.Model):
                      "accurate"
     )
     is_line_manager_confirmed = models.BooleanField(
-        verbose_name="My line manager has confirmed this information")
+        verbose_name="My line manager has confirmed the decision to record "
+                     "this win"
+    )
 
-    lead_officer_name = models.CharField(max_length=128)
+    lead_officer_name = models.CharField(
+        max_length=128,
+        verbose_name="Lead officer's name",
+        help_text="This is the name that will be included in the email to the "
+                  "customer"
+    )
+
+    lead_officer_email_address = models.EmailField(
+        verbose_name="Lead officer's email address",
+        blank=True
+    )
+    other_official_email_address = models.EmailField(
+        verbose_name="Other officer's email address",
+        blank=True
+    )
     line_manager_name = models.CharField(
         max_length=128, verbose_name="Line manager's name")
     team_type = models.CharField(max_length=128, choices=TEAMS)
@@ -97,7 +124,7 @@ class Win(models.Model):
         verbose_name="HQ Team, Region or Post",
         choices=HQ_TEAM_REGION_OR_POST
     )
-    location = models.CharField(max_length=128)
+    location = models.CharField(max_length=128, blank=True)
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -110,6 +137,11 @@ class Win(models.Model):
 
 
 class Breakdown(models.Model):
+    """ Export/non-export value broken down by given year
+
+    Totals found in win model as `total_expected_export_value` and
+    `total_expected_non_export_value`.
+    """
 
     TYPE_EXPORT = 1
     TYPE_NON_EXPORT = 2
@@ -147,30 +179,31 @@ class Advisor(models.Model):
 
 
 class CustomerResponse(models.Model):
+    """ Customer's response to being asked about an "export win" """
 
     win = models.OneToOneField(Win, related_name="confirmation")
 
     access_to_contacts = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Gained access to contacts not otherwise accessible"
+        verbose_name="Gained access to contacts not otherwise accessible?"
     )
     access_to_information = models.PositiveIntegerField(
         choices=RATINGS,
         verbose_name="Gained access to information or improved understanding "
-                     "of the country"
+                     "of the country?"
     )
     improved_profile = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Improved your profile or credibility in the country"
+        verbose_name="Improved your profile or credibility in the country?"
     )
     gained_confidence = models.PositiveIntegerField(
         choices=RATINGS,
         verbose_name="Gained the confidence to explore or expand in the "
-                     "country"
+                     "country?"
     )
     developed_relationships = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Developed and/or nurtured critical relationships"
+        verbose_name="Developed and/or nurtured critical relationships?"
     )
     overcame_problem = models.PositiveIntegerField(
         choices=RATINGS,
@@ -179,30 +212,30 @@ class CustomerResponse(models.Model):
     )
 
     involved_state_enterprise = models.BooleanField(
-        verbose_name="Did the Win involve a foreign government or state-owned "
+        verbose_name="Did the win involve a foreign government or state-owned "
                      "enterprise? (e.g. as a customer, an intermediary or "
                      "facilitator)"
     )
     interventions_were_prerequisite = models.BooleanField(
-        verbose_name="Were any of the interventions needed for this Win a "
+        verbose_name="Were any of the interventions needed for this win a "
                      "pre-requisite for the export value to be realised?"
     )
     support_improved_speed = models.BooleanField(
         verbose_name="Did our support or intervention(s) help you achieve "
-                     "this Win more quickly than you otherwise would have "
+                     "this win more quickly than you otherwise would have "
                      "done?"
     )
     expected_portion_without_help = models.PositiveIntegerField(
         choices=WITHOUT_OUR_SUPPORT,
         verbose_name="What proportion of the total expected export value of "
-                     "this Win would you have achieved without our support?"
+                     "this win would you have achieved without our support?"
     )
     last_export = models.PositiveIntegerField(
         choices=EXPERIENCE,
         verbose_name="When did your company last export goods and/or services?"
     )
     company_was_at_risk_of_not_exporting = models.BooleanField(
-        verbose_name="Prior to securing this Win, was your company at risk of "
+        verbose_name="Prior to securing this win, was your company at risk of "
                      "not exporting?"
     )
     has_explicit_export_plans = models.BooleanField(
@@ -210,14 +243,14 @@ class CustomerResponse(models.Model):
                      "months?"
     )
     has_enabled_expansion_into_new_market = models.BooleanField(
-        verbose_name="Has this Win enabled you to expand into a new market?"
+        verbose_name="Has this win enabled you to expand into a new market?"
     )
     has_increased_exports_as_percent_of_turnover = models.BooleanField(
-        verbose_name="Has this Win enabled you to increase exports as a % of "
+        verbose_name="Has this win enabled you to increase exports as a % of "
                      "your turnover?"
     )
     has_enabled_expansion_into_existing_market = models.BooleanField(
-        verbose_name="Has this Win enabled you to expand into an existing "
+        verbose_name="Has this win enabled you to expand into an existing "
                      "market?"
     )
     comments = models.TextField(blank=True)
@@ -237,7 +270,7 @@ class Notification(models.Model):
         (TYPE_CUSTOMER, "Customer")
     )
 
-    win = models.ForeignKey(Win)
+    win = models.ForeignKey(Win, related_name="notifications")
     user = models.ForeignKey(
         User, blank=True, null=True, related_name="notifications")
     recipient = models.EmailField()

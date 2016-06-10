@@ -3,10 +3,6 @@
 # not going to over-complicate things at this stage for the sake of
 # over-engineering.
 
-# Also note that I've commented out DSO because I didn't sign up to sell
-# weapons.  If you're comfortable with your helping DSO being on your
-# conscience, then by all means, you can enable that here.  It's on you.
-
 from django_countries import countries
 
 EXPERIENCE = (
@@ -260,12 +256,12 @@ PROGRAMMES = (
 )
 
 RATINGS = (
+    (0, "N/A"),
     (1, "1"),
     (2, "2"),
     (3, "3"),
     (4, "4"),
     (5, "5"),
-    (6, "N/A"),
 )
 
 SECTORS = (
@@ -531,7 +527,7 @@ SECTORS = (
 TEAMS = (
     ("team", "Trade (TD or ST)"),
     ("investment", "Investment (ITFG or IG)"),
-    # ("dso", "DSO"),
+    ("dso", "DSO"),
     ("other", "Other HQ Team"),
     ("region", "UK Region"),
     ("post", "Overseas Post"),  # There's nothing for this?
