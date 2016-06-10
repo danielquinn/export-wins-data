@@ -47,3 +47,4 @@ something like this:
 3. Change to the root directory of this project (where `pytest.ini` 
    lives)
 3. Execute `py.test`.
+
