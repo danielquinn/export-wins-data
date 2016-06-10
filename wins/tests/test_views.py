@@ -79,6 +79,9 @@ class AlicePermissionTestCase(TestCase):
           "total_expected_non_export_value": 5,
           "type": 1,
           "type_of_support_1": 1,
+          "business_type": 1,
+          "name_of_export": "name",
+          "name_of_customer": "name",
         }
 
         self.NOTIFICATIONS_POST_SAMPLE = {
