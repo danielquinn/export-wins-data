@@ -1,4 +1,4 @@
-We are contacting you to let you know that an Export Win you recorded has been forwarded to {{ win.customer_name }} of {{ win.company_name }} for confirmation.  The message attached that email says:
+We are contacting you to let you know that an Export Win you recorded will shortly be forwarded to {{ win.customer_name }} of {{ win.company_name }} for confirmation.  The message attached to that email will say:
 
 
 - - - -
@@ -9,7 +9,7 @@ We are contacting you to let you know that an Export Win you recorded has been f
 > It's been a privilege to work with you on this. As part of my role, I have to
 > report on the service I've provided to customers like you.  Could I ask you
 > to confirm details of your success by clicking on the link below?  It should
-> only take a couple minutes of your time.  I'd really appreciate it.
+> only take a couple minutes of your time and I'd really appreciate your help.
 
 - - - -
 

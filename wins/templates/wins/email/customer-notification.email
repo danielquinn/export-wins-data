@@ -9,8 +9,8 @@ It's been a privilege to work with you on this. As part of my role, I have to re
 Best regards
 
 {{ win.lead_officer_name|safe }}
+{{ win.get_hq_team_display|safe }}
+{{ win.lead_officer_email_address|default:win.user.email }}
+https://www.gov.uk/ukti
 
-UK Trade & Investment
-Officer team name: {{ win.get_hq_team_display|safe }}
-E-mail: {{ win.lead_officer_email_address|default:win.user.email }}
-Web: https://www.gov.uk/ukti
+UK Trade & Investment is the Government Department that helps UK-based companies succeed globally and assists overseas companies to bring investment to the UK.
