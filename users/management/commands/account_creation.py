@@ -20,11 +20,21 @@ class Command(BaseCommand):
         self.words = self._get_words()
 
         self.do_mail = True
+        self.resend = False
 
     def add_arguments(self, parser):
 
         parser.add_argument("--name", type=str)
+
         parser.add_argument("--email", type=str)
+
+        parser.add_argument(
+            "--resend",
+            action="store_true",
+            help="If a given email address exists, reset the password. "
+                 "Otherwise raise an exception."
+        )
+
         parser.add_argument(
             "--from-file",
             type=argparse.FileType('r'),
@@ -32,14 +42,15 @@ class Command(BaseCommand):
                  '"name","email".  This option is exclusive to use of --name '
                  'and --email.'
         )
+
         parser.add_argument(
             "--print",
             action="store_true",
-            help="Don't generate and send email to the user.  Instead, just "
-                 "print out their username & password to stdout."
+            help="Create user and password, but just print it don't send."
         )
 
     def handle(self, *args, **options):
+        """ Handle command line flags, and then do the business """
 
         if not (options["name"] and options["email"]):
             if not options["from_file"]:
@@ -51,6 +62,9 @@ class Command(BaseCommand):
         if options["print"]:
             self.do_mail = False
 
+        if options["resend"]:
+            self.resend = True
+
         if options["from_file"]:
             return self._handle_batch(options["from_file"])
 
@@ -59,14 +73,14 @@ class Command(BaseCommand):
     def _handle_batch(self, file_handle):
         for row in csv.reader(file_handle):
             if row:
-                self._create_user(
+                self._handle_user(
                     row[0].strip(),
                     self._sanitise_email(row[1]),
                     self._generate_password()
                 )
 
     def _handle_single(self, name, email):
-        self._create_user(
+        self._handle_user(
             name.strip(),
             self._sanitise_email(email),
             self._generate_password()
@@ -118,6 +132,8 @@ class Command(BaseCommand):
         time.sleep(1)
 
     def _generate_password(self):
+        """ Make a password from selection of random words """
+
         separator = random.choice(("-", ",", ".", "_"))
         return "{}{}{}{}{}{}{}".format(
             random.choice(self.words), separator,
@@ -128,13 +144,16 @@ class Command(BaseCommand):
 
     @staticmethod
     def _get_words():
+        """ Get words for use in password from a pre-filtered file """
+
         path = os.path.join(settings.BASE_DIR, "users", "words.bz2")
         with bz2.open(path) as f:
             return [str(w.strip(), "utf-8") for w in f.readlines()]
 
-    def _create_user(self, name, email, password):
+    def _handle_user(self, name, email, password):
+        """ Get or create the user, set password and either send or print """
 
-        user = User.objects.create(name=name, email=email)
+        user = self._get_or_create_user(name, email)
         user.set_password(password)
         user.save()
 
@@ -149,3 +168,17 @@ class Command(BaseCommand):
             )
 
         return user
+
+    def _get_or_create_user(self, name, email):
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # always want to create a new user if none exists
+            return User.objects.create(name=name, email=email)
+
+        if not self.resend:
+            # we haven't been given the command line flag to allow re-using
+            # existing users
+            raise Exception("user already exists")
+        else:
+            return user
