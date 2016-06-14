@@ -212,3 +212,5 @@ if DEBUG:
             },
         }
     }
+
+SESSION_COOKIE_AGE = 60 * 60 * 8  # 8 Hours
