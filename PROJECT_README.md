@@ -23,11 +23,11 @@ order from simplest to craziest.
 
 ## Request Signing
 
-Thanks to `alice.middleware.SignatureRejectionMiddleware` on the data server,
-all requests to the that server will be rejected unless they come with a
-special `X-Signature: ` header.  This middleware on the data server is where
-the rejection happens, and `alice.helpers.rabbit` on the UI server is where the
-request is signed and issued.
+Thanks to `export-wins-data:alice.middleware.SignatureRejectionMiddleware` on
+the data server, all requests to the that server will be rejected unless they
+come with a special `X-Signature: ` header.  This middleware on the data server
+is where the rejection happens, and `alice.helpers.rabbit` on the UI server is
+where the request is signed and issued.
 
 For the most part, there's not much to worry about here.  `rabbit` is just a
 wrapper around the `requests` library, and you can treat rabbit just like
@@ -60,7 +60,7 @@ to see what's up.
 ## Session Handling and the Alice Cookie
 
 Now that we've verified the communication between the UI server and the API
-server, we can man unauthenticated requests on behalf of our users without
+server, we can send unauthenticated requests on behalf of our users without
 issue.  However, we haven't covered how we manage to identify our *users* to
 the data server yet.  For this, we're doing a bit of a hack on Django's session
 handling.
@@ -78,9 +78,9 @@ gist:
   pans out, attaches the session id and user object to `request` as `alice_id`
   and `user` respectively.
 * Requests to the data server that are privileged require that the `request`
-  object be passed in.  Rabbit then uses sets the `sessionid` cookie value to
+  object be passed in.  Rabbit then sets the `sessionid` cookie value to
   `request.alice_id` when it sends its request to the data server.
-* The data server has no idea what's going on and assumes everything just a
+* The data server has no idea what's going on and assumes everything is just a
   typical Django session process.
 
 
@@ -124,10 +124,11 @@ form = MyForm()
 form.fields["my_field"]  # A form field
 ```
 
-The problem for this project though is that the definition of what fields we
-want to have in our form *is defined by the data server*.  Sure, we could
-manually recreate the form on the UI to reflect what's defined on the API and
-then keep everything in sync forever, but *who has the patience for that?*
+The problem for this project though is that while most projects have a Django
+model on which to base a form, the definition of what fields we want to have in
+our form *is defined by the data server*.  Sure, we could manually recreate the
+form on the UI to reflect what's defined on the API and then keep everything in
+sync forever, but *who has the patience for that?*
 
 Instead, we have two components:
 
