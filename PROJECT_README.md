@@ -23,11 +23,11 @@ order from simplest to craziest.
 
 ## Request Signing
 
-Thanks to `export-wins-data:alice.middleware.SignatureRejectionMiddleware` on
-the data server, all requests to the that server will be rejected unless they
-come with a special `X-Signature: ` header.  This middleware on the data server
-is where the rejection happens, and `alice.helpers.rabbit` on the UI server is
-where the request is signed and issued.
+Thanks to [`alice.middleware.SignatureRejectionMiddleware`](https://github.com/UKTradeInvestment/export-wins-data/blob/master/alice/middleware.py)
+on the data server, all requests to the that server will be rejected unless
+they come with a special `X-Signature: ` header.  This middleware on the data
+server is where the rejection happens, and [`alice.helpers.rabbit`](https://github.com/UKTradeInvestment/export-wins-ui/blob/master/alice/helpers.py)
+on the UI server is where the request is signed and issued.
 
 For the most part, there's not much to worry about here.  `rabbit` is just a
 wrapper around the `requests` library, and you can treat rabbit just like
@@ -88,21 +88,22 @@ gist:
 
 Some creative coding went into making this work.  Specifically:
 
-* `export-wins-data:alice.authentication.NoCSRFSessionAuthentication`: There's
-  a bigger comment in that file, but the gist is that we turn off CSRF
+* [`alice.authentication.NoCSRFSessionAuthentication`](https://github.com/UKTradeInvestment/export-wins-data/blob/master/alice/authentication.py):
+  There's a bigger comment in that file, but the gist is that we turn off CSRF
   protection because it's not required on a purely API box.
-* `export-wins-ui:alice.braces.LoginRequiredMixin`: There's absolutely nothing
-  special about this class.  In fact, it's just a copy/paste of what you find
-  in Django's class with the same name.  The only thing different is:
+* [`alice.braces.LoginRequiredMixin`](https://github.com/UKTradeInvestment/export-wins-ui/blob/master/alice/braces.py):
+  There's absolutely nothing special about this class.  In fact, it's just a
+  copy/paste of what you find in Django's class with the same name.  The only
+  thing different is:
     * We stripped out anything that we're not using or don't need to override.
     * This file doesn't import anything that requires the auth stuff in the
       database (we stripped all that out since we don't need/want it).
-* `export-wins-ui:alice.middleware.AliceMiddleware`: Does the aforementioned
-  validation of the JWT coming from the client.
-* `export-wins-ui:alice.models.User`: A fake User class, made to act like
-  Django's standard one.  For the few cases where a user class is expected
-  (like in the templates, where you do `{{ user.is_authenticated }}`), this
-  will make things Just Work.
+* [`alice.middleware.AliceMiddleware`](https://github.com/UKTradeInvestment/export-wins-ui/blob/master/alice/middleware.py):
+  Does the aforementioned validation of the JWT coming from the client.
+* [`alice.models.User`](https://github.com/UKTradeInvestment/export-wins-ui/blob/master/alice/models.py):
+  A fake User class, made to act like Django's standard one.  For the few cases
+  where a user class is expected (like in the templates, where you do
+  `{{ user.is_authenticated }}`), this will make things Just Work.
 
 ## Dynamic Form Generation (Metaclasses)
 
@@ -136,14 +137,13 @@ Instead, we have two components:
   fields and their properties for that route.  (For example: `/wins/` and
   `/wins/schema/`)
 * The UI server has forms that inherit from
-  `export-wins-ui:alice.metaclasses.ReflectiveFormMetaclass`.  These forms
-  are smart enough to *configure themselves based on whatever the data server
-  says*
+  [`alice.metaclasses.ReflectiveFormMetaclass`](https://github.com/UKTradeInvestment/export-wins-ui/blob/master/alice/metaclasses.py).
+  These forms are smart enough to *configure themselves based on whatever the
+  data server says*
 
 You can of course override whatever is done in this magic (just as you might
 with a standard Django form, just tweak things in the `__init__()`.  In fact,
-there should be some tweaking already happening in
-`export-wins-ui:wins/forms.py`.
+there should be some tweaking already happening in [`wins.forms`](https://github.com/UKTradeInvestment/export-wins-ui/blob/master/wins/forms.py).
 
 ### Rabbiting at Start Up
 
