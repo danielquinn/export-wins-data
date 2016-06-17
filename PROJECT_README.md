@@ -105,6 +105,7 @@ Some creative coding went into making this work.  Specifically:
   where a user class is expected (like in the templates, where you do
   `{{ user.is_authenticated }}`), this will make things Just Work.
 
+
 ## Dynamic Form Generation (Metaclasses)
 
 This is the craziest part of the whole thing.
@@ -145,6 +146,7 @@ You can of course override whatever is done in this magic (just as you might
 with a standard Django form, just tweak things in the `__init__()`.  In fact,
 there should be some tweaking already happening in [`wins.forms`](https://github.com/UKTradeInvestment/export-wins-ui/blob/master/wins/forms.py).
 
+
 ### Rabbiting at Start Up
 
 There's one caveat to this, and that's the fact that because the UI server
@@ -152,3 +154,25 @@ defines its classes based on the output of the data server, **you must start
 the data server *before* the UI server**.  More importantly, if you *change*
 the data server, you must restart the UI server for these changes to take
 effect in your forms.
+
+
+## Testing
+
+We have *some* unit tests, but not nearly enough yet to constitute proper
+coverage.  As a result, deploys and merges are still best tested in a sort of
+spot-checking fashion.  Here's a method I've found to work for me:
+
+1. Try to visit `/wins/new/` whilst not logged in.  You should be redirected to
+   the login page.
+2. Log in
+3. Create a win
+    * Include your own account for the customer email address
+4. Log out
+5. Use the Heroku toolkit to log into the server and make sure that the win was
+   in fact created.  Note the id.
+6. If the customer emails are enabled, you should have one waiting for you.  If
+   they aren't, you can use the win id you got via Heroku and visit
+   `/wins/review/<win_id>`
+7. Fill out and submit the customer review form.
+
+If nothing explodes, I call it a win.
