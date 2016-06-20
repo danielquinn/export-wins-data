@@ -1,8 +1,12 @@
 import json
+import os
+import textwrap
 
 from dateutil.relativedelta import relativedelta
 
+from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intword
+from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 from django.db.models.aggregates import Sum
 from django.utils import timezone
@@ -13,6 +17,7 @@ from ...models import Win, CustomerResponse
 
 
 class Command(BaseCommand):
+    """ Emails stats of Wins and Users to date (optional JSON) """
 
     # A user attribute like should_be_ignored is probably better but this will
     # do for now.
@@ -61,34 +66,42 @@ class Command(BaseCommand):
 
         if options["json"]:
             return self._handle_json(stats)
-        return self._handle_stdout(stats)
 
-    def _handle_stdout(self, stats):
+        stats_txt = self._generate_txt(stats)
+        send_to_addresses = os.getenv("STATS_EMAILS").split(',')
 
+        send_mail(
+            "Export Wins statistics",
+            stats_txt,
+            settings.SENDING_ADDRESS,
+            send_to_addresses,
+        )
+
+
+    def _generate_txt(self, stats):
         wins = stats["wins"]
         users = stats["users"]
+        stats_txt = """
+            Wins
+            -----------------------------------------
+            Total wins generated:   {:>15}
+            Total wins confirmed:   {:>15}
+            Total export funds:     {:>15}
+            Total non-export funds: {:>15}
 
-        self.stdout.write(
-            "\n"
-            "  Wins\n"
-            "  -----------------------------------------\n"
-            "    Total wins generated:   {:>15}\n"
-            "    Total wins confirmed:   {:>15}\n"
-            "    Total export funds:     {:>15}\n"
-            "    Total non-export funds: {:>15}\n"
-            "\n"
-            "  Users\n"
-            "  -----------------------------------------\n"
-            "    Total currently active: {:>15}\n"
-            "    Total ever active:      {:>15}\n"
-            "\n".format(
+            Users
+            -----------------------------------------
+            Total currently active: {:>15}
+            Total ever active:      {:>15}
+            """.format(
                 wins["total"],
                 wins["confirmed"],
                 "£{}".format(intword(wins["total-export-funds"])),
                 "£{}".format(intword(wins["total-non-export-funds"])),
                 users["total-active"],
                 users["total-creating-wins"]
-            ))
+            )
+        return textwrap.dedent(stats_txt)
 
     @staticmethod
     def _handle_json(stats):
