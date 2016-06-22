@@ -1,0 +1,5 @@
+Thank you for submitting a new Export Win for {{ win.company_name }} in {{ win.country.name }}. This win will be forwarded to the Customer ({{ win.customer_name|title }}) shortly.
+
+While we are testing the new digital process, there may be a delay before we contact Customers to confirm Export Wins. We will let you know by email when we contact your Customer to confirm this win.
+
+If you would like to offer feedback on this service, please contact us, giving brief details at: {{ feedback_address }}

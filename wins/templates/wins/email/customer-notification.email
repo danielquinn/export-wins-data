@@ -1,4 +1,4 @@
-Dear {{ win.customer_name }}
+For attention of: {{ win.customer_name|title }}
 
 I'm delighted to hear of your recent export business success in {{ win.country.name }}.
 
