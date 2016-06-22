@@ -50,6 +50,7 @@ class LimitedWinViewSet(WinViewSet):
 
 
 class NotificationViewSet(ModelViewSet):
+    """ Endpoint to instruct data server to notify officer or customer """
 
     model = Notification
     queryset = Notification.objects.all()
@@ -61,9 +62,9 @@ class NotificationViewSet(ModelViewSet):
     def perform_create(self, serializer):
         instance = serializer.save()
         if instance.type == Notification.TYPE_OFFICER:
-            serializer.send_officer_email(instance)
-        elif instance.type == Notification.TYPE_CUSTOMER:
-            serializer.send_customer_email(self.request, instance)
+            serializer.send_intermediate_officer_email(instance.win)
+        # elif instance.type == Notification.TYPE_CUSTOMER:
+        #     serializer.send_customer_email(self.request, instance.win)
         return instance
 
 
