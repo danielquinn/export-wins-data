@@ -1,0 +1,9 @@
+For the attention of: {{ customer_response.win.lead_officer_name }}
+
+{{ customer_response.name }} from {{ customer_response.win.company_name }} has submitted a response to the Export Win you recorded in {{ customer_response.win.country.name }}.
+
+We are still developing the functionality to allow you to view the Customer's response in our digital service, but the comments they included in their response were:
+
+{{ customer_response.comments }}
+
+If you would like to offer feedback on this service, please contact us, giving brief details at: {{ feedback_address }}

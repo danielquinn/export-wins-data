@@ -119,7 +119,7 @@ class Command(BaseCommand):
             "Password: {}\n\nIf you experience a problem accessing or "
             "completing the form using the link above, please contact us "
             "by email using the feedback button in the service or at:"
-            "\n\n  Email: ada.lovelace@ukti.gsi.gov.uk\n  Subject: Export "
+            "\n\n  Email: exportwins@ukti.gsi.gov.uk\n  Subject: Export "
             "Wins Feedback\n\nBest Regards\n\n"
             "The UKTI Digital Team".format(
                 email,
