@@ -135,6 +135,15 @@ class Win(models.Model):
             self.id = str(uuid.uuid4())
         models.Model.save(self, *args, **kwargs)
 
+    @property
+    def target_addresses(self):
+        addresses = [self.user.email]
+        if self.lead_officer_email_address:
+            addresses.append(self.lead_officer_email_address)
+        if self.other_official_email_address:
+            addresses.append(self.other_official_email_address)
+        return tuple(set(addresses))
+
 
 class Breakdown(models.Model):
     """ Export/non-export value broken down by given year
@@ -262,6 +271,7 @@ class CustomerResponse(models.Model):
 
 
 class Notification(models.Model):
+    """ Record when notifications sent (for analysis and sending followups) """
 
     TYPE_OFFICER = "o"
     TYPE_CUSTOMER = "c"

@@ -33,7 +33,4 @@ class SignatureRejectionMiddleware(object):
             request.get_full_path(),
             request.body,
         )
-
-        self.logger.debug("  {} vs. {}".format(generated, offered))
-
         return constant_time_compare(generated, offered)

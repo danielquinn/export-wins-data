@@ -7,8 +7,8 @@ from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from ...models import Win, Notification
-from ...serializers import NotificationSerializer
+from ...models import Win
+from ... import notifications
 
 
 class Command(BaseCommand):
@@ -35,7 +35,7 @@ class Command(BaseCommand):
         for win in wins:
 
             url = "https://www.exportwins.ukti.gov.uk/wins/review/" + str(win.pk)
-            customer_email_dict = NotificationSerializer.generate_customer_email(
+            customer_email_dict = notifications.generate_customer_email(
                 url, win)
 
             print()
@@ -54,7 +54,7 @@ class Command(BaseCommand):
         print('\n\n')
 
         for win in wins:
-            officer_email_dict = NotificationSerializer.generate_officer_email(win)
+            officer_email_dict = notifications.generate_officer_email(win)
 
             print()
             print(', '.join(officer_email_dict['to']))

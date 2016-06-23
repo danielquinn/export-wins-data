@@ -12,6 +12,7 @@ from .serializers import (
     AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
 )
 from alice.views import AliceMixin
+from . import notifications
 
 
 class StandardPagination(PageNumberPagination):
@@ -62,9 +63,9 @@ class NotificationViewSet(ModelViewSet):
     def perform_create(self, serializer):
         instance = serializer.save()
         if instance.type == Notification.TYPE_OFFICER:
-            serializer.send_intermediate_officer_email(instance.win)
+            notifications.send_intermediate_officer_email(instance.win)
         # elif instance.type == Notification.TYPE_CUSTOMER:
-        #     serializer.send_customer_email(self.request, instance.win)
+        #     notifications.send_customer_email(self.request, instance.win)
         return instance
 
 
@@ -84,6 +85,11 @@ class ConfirmationViewSet(ModelViewSet):
     def schema(self, request):
         return Response(
             self.metadata_class().get_serializer_info(self.get_serializer()))
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        notifications.send_officer_notification_of_customer_response(instance)
+        return instance
 
 
 class BreakdownViewSet(AliceMixin, ModelViewSet):

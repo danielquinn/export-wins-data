@@ -1,7 +1,9 @@
 import json
 
-from django.test import TestCase, Client, override_settings
+from django.core import mail
 from django.core.urlresolvers import reverse
+from django.test import TestCase, Client, override_settings
+
 from rest_framework.authtoken.models import Token
 
 from ..factories import WinFactory
@@ -336,6 +338,8 @@ class AlicePermissionTestCase(TestCase):
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_post_pass(self, url, data):
+        """ Test POSTing succeeds """
+
         self._login(signed=True)
         response = self.alice_client.post(url, data)
         self.assertEqual(response.status_code, 201, response.content)
@@ -353,6 +357,28 @@ class AlicePermissionTestCase(TestCase):
         self._test_post_pass(
             self.customerresponses_list,
             self.CUSTOMER_RESPONSES_POST_SAMPLE,
+        )
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_customerresponses_post_pass_send_confirmation(self):
+        self.win.lead_officer_email_address = 'lead@example.com'
+        self.win.save()
+        self._test_post_pass(
+            self.customerresponses_list,
+            self.CUSTOMER_RESPONSES_POST_SAMPLE,
+        )
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals(
+            mail.outbox[0].subject,
+            'Customer response to Export Win',
+        )
+        self.assertIn(
+            'has submitted a response to the Export Win you recorded in',
+            mail.outbox[0].body,
+        )
+        self.assertEqual(
+            set(mail.outbox[0].to),
+            set([self.win.lead_officer_email_address, self.win.user.email]),
         )
 
     def test_breakdowns_post_pass(self):
