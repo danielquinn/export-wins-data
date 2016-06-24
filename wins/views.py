@@ -88,7 +88,7 @@ class ConfirmationViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save()
-        notifications.send_officer_notification_of_customer_response(instance)
+        # notifications.send_officer_notification_of_customer_response(instance)
         return instance
 
 
