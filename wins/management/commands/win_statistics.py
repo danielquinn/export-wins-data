@@ -54,13 +54,19 @@ class Command(BaseCommand):
                     total=Sum("total_expected_export_value"))["total"],
                 "total-non-export-funds": wins.aggregate(
                     total=Sum("total_expected_non_export_value"))["total"],
-                "confirmed": confirmations.count()
+                "confirmed": confirmations.count(),
+                "total-confirmed-export-funds": wins.filter(confirmation__isnull=False).aggregate(
+                    total=Sum("total_expected_export_value"))["total"],
+                "total-confirmed-non-export-funds": wins.filter(confirmation__isnull=False).aggregate(
+                    total=Sum("total_expected_non_export_value"))["total"],
+
             },
             "users": {
                 "total-active": users.filter(
                     last_login__gt=one_week_ago).count(),
                 "total-creating-wins": users.exclude(
-                    wins__isnull=True).distinct().count()
+                    wins__isnull=True).distinct().count(),
+                "total": users.count(),
             }
         }
 
@@ -82,24 +88,39 @@ class Command(BaseCommand):
         wins = stats["wins"]
         users = stats["users"]
         stats_txt = """
-            Wins
-            -----------------------------------------
-            Total wins generated:   {:>15}
-            Total wins confirmed:   {:>15}
-            Total export funds:     {:>15}
-            Total non-export funds: {:>15}
+            Export Wins input by officers
+            -----------------------------
 
-            Users
-            -----------------------------------------
-            Total currently active: {:>15}
-            Total ever active:      {:>15}
+            Total wins generated: {}
+            Total expected export value: {}
+            Total expected non-export value: {}
+
+
+            Export wins customers customers have responded to
+            -------------------------------------------------
+
+            Total wins responded to: {}
+            Total expected export value: {}
+            Total expected non export value: {}
+
+
+            Users (officers)
+            ----------------
+
+            Total logged in last week: {}
+            Total who have submitted wins: {}
+            Total who have been issued password: {}
+
             """.format(
                 wins["total"],
-                wins["confirmed"],
                 "£{}".format(intword(wins["total-export-funds"])),
                 "£{}".format(intword(wins["total-non-export-funds"])),
+                wins["confirmed"],
+                "£{}".format(intword(wins["total-confirmed-export-funds"])),
+                "£{}".format(intword(wins["total-confirmed-non-export-funds"])),
                 users["total-active"],
-                users["total-creating-wins"]
+                users["total-creating-wins"],
+                users["total"]
             )
         return textwrap.dedent(stats_txt)
 
