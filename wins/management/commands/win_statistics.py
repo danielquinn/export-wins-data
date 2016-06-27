@@ -88,24 +88,27 @@ class Command(BaseCommand):
         wins = stats["wins"]
         users = stats["users"]
         stats_txt = """
-            Export Wins input by officers
-            -----------------------------
+            Export Wins input by officers:
 
             Total wins generated: {}
             Total expected export value: {}
             Total expected non-export value: {}
 
 
-            Export wins customers customers have responded to
-            -------------------------------------------------
+            -----
+
+
+            Export wins customers have responded to:
 
             Total wins responded to: {}
             Total expected export value: {}
             Total expected non export value: {}
 
 
-            Users (officers)
-            ----------------
+            -----
+
+
+            Users (officers):
 
             Total logged in last week: {}
             Total who have submitted wins: {}
