@@ -165,8 +165,12 @@ class Breakdown(models.Model):
     value = models.PositiveIntegerField()
 
     def __str__(self):
-        return "{}/{}: {}".format(
-            self.year, str(self.year + 1)[:-2], self.value / 100)
+        return "{}/{} {}: {}K".format(
+            self.year,
+            str(self.year + 1)[-2:],
+            dict(self.TYPES)[self.type],
+            self.value / 1000,
+        )
 
 
 class Advisor(models.Model):
