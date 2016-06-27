@@ -615,3 +615,23 @@ class AlicePermissionTestCase(TestCase):
             self.alice_client.login(username=self.user.email, password="asdf")
         else:
             self.client.login(username=self.user.email, password="asdf")
+
+    @override_settings(UI_SECRET=AliceClient.SECRET)
+    def test_csv_not_allowed_without_sig(self):
+        self._login(signed=False)
+        response = self.alice_client.get(reverse('csv'))
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(UI_SECRET=AliceClient.SECRET)
+    def test_csv_not_allowed_without_perm(self):
+        self._login(signed=True)
+        response = self.alice_client.get(reverse('csv'))
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(UI_SECRET=AliceClient.SECRET)
+    def test_csv_allowed_with_perm(self):
+        self.user.is_staff = True
+        self.user.save()
+        self._login(signed=True)
+        response = self.alice_client.get(reverse('csv'))
+        self.assertEqual(response.status_code, 200)
