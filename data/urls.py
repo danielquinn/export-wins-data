@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 from users.views import LoginView
 from wins.views import (
     WinViewSet, BreakdownViewSet, AdvisorViewSet, ConfirmationViewSet,
-    NotificationViewSet, LimitedWinViewSet
+    NotificationViewSet, LimitedWinViewSet, CSVView
 )
 
 router = DefaultRouter()
@@ -19,6 +19,8 @@ router.register(r"notifications", NotificationViewSet)
 urlpatterns = [
 
     url(r"^", include(router.urls, namespace="drf")),
+
+    url(r"^csv/$", CSVView.as_view(), name="csv"),
 
     # Override DRF's default 'cause our includes brute-force protection
     url(r"^auth/login/$", LoginView.as_view(), name="login"),

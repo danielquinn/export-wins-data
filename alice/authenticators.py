@@ -1,29 +1,22 @@
 import logging
 
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class AlicePermission(IsAuthenticated):
+class AlicePermission(BasePermission):
     """
     Allows a GET request to schema, and view-defined requests to everything
     else so long as they're authenticated.
     """
 
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
-        IsAuthenticated.__init__(self)
-
     def has_permission(self, request, view):
 
         if request.method in SAFE_METHODS:
-            if view.action == "schema":
-                self.logger.debug("OK: schema")
+            if hasattr(view, 'action') and view.action == "schema":
                 return True
 
-        if IsAuthenticated.has_permission(self, request, view):
+        # as IsAuthenticated permission
+        if request.user and request.user.is_authenticated():
             return True
-
-        self.logger.debug("Not authenticated: {}".format(
-            request.META.get("Authorization")))
 
         return False

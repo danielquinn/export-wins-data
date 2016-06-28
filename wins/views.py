@@ -1,18 +1,29 @@
+
+import csv
+import io
+import zipfile
+
+from django.db import connection
+from django.http import HttpResponse
+
+from rest_framework import authentication, permissions
 from rest_framework.decorators import list_route
 from rest_framework.filters import DjangoFilterBackend, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
+from . import notifications
 from .filters import CustomerResponseFilterSet
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from .serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
     AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
 )
+from alice.authenticators import AlicePermission
 from alice.views import AliceMixin
-from . import notifications
 
 
 class StandardPagination(PageNumberPagination):
@@ -112,3 +123,29 @@ class AdvisorViewSet(AliceMixin, ModelViewSet):
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
+
+
+def make_csv(table):
+    """ Get CSV of table """
+
+    stringio = io.StringIO()
+    cursor = connection.cursor()
+    cursor.execute("select * from wins_{};".format(table))
+    csv_writer = csv.writer(stringio)
+    header = [i[0] for i in cursor.description]
+    csv_writer.writerow(header)
+    csv_writer.writerows(cursor)
+    return stringio.getvalue()
+
+
+class CSVView(APIView):
+    permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request, format=None):
+        bytesio = io.BytesIO()
+        zf = zipfile.ZipFile(bytesio, 'w')
+        for table in ['win', 'customerresponse']:
+            csv_str = make_csv(table)
+            zf.writestr(table + 's.csv', csv_str)
+        zf.close()
+        return HttpResponse(bytesio.getvalue())
