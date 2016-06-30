@@ -359,27 +359,27 @@ class AlicePermissionTestCase(TestCase):
             self.CUSTOMER_RESPONSES_POST_SAMPLE,
         )
 
-    # @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
-    # def test_customerresponses_post_pass_send_confirmation(self):
-    #     self.win.lead_officer_email_address = 'lead@example.com'
-    #     self.win.save()
-    #     self._test_post_pass(
-    #         self.customerresponses_list,
-    #         self.CUSTOMER_RESPONSES_POST_SAMPLE,
-    #     )
-    #     self.assertEquals(len(mail.outbox), 1)
-    #     self.assertEquals(
-    #         mail.outbox[0].subject,
-    #         'Customer response to Export Win',
-    #     )
-    #     self.assertIn(
-    #         'has submitted a response to the Export Win you recorded in',
-    #         mail.outbox[0].body,
-    #     )
-    #     self.assertEqual(
-    #         set(mail.outbox[0].to),
-    #         set([self.win.lead_officer_email_address, self.win.user.email]),
-    #     )
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+    def test_customerresponses_post_pass_send_confirmation(self):
+        self.win.lead_officer_email_address = 'lead@example.com'
+        self.win.save()
+        self._test_post_pass(
+            self.customerresponses_list,
+            self.CUSTOMER_RESPONSES_POST_SAMPLE,
+        )
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals(
+            mail.outbox[0].subject,
+            'Customer response to Export Win',
+        )
+        self.assertIn(
+            'has submitted a response to the Export Win you recorded in',
+            mail.outbox[0].body,
+        )
+        self.assertEqual(
+            set(mail.outbox[0].to),
+            set([self.win.lead_officer_email_address, self.win.user.email]),
+        )
 
     def test_breakdowns_post_pass(self):
         self._test_post_pass(
