@@ -21,7 +21,7 @@ class Command(BaseCommand):
         officer emails.
         """
 
-        given_win_ids = options['ids'].split(',')
+        given_win_ids = [w.replace('-', '') for w in options['ids'].split(',')]
 
         wins = Win.objects.filter(id__in=given_win_ids)
         found_win_ids = set(str(win.id).replace('-', '') for win in wins)
