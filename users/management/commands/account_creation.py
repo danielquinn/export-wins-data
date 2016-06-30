@@ -20,6 +20,7 @@ class Command(BaseCommand):
         self.words = self._get_words()
 
         self.do_mail = True
+        self.ignore_existing = True
         self.resend = False
 
     def add_arguments(self, parser):
@@ -153,7 +154,17 @@ class Command(BaseCommand):
     def _handle_user(self, name, email, password):
         """ Get or create the user, set password and either send or print """
 
-        user = self._get_or_create_user(name, email)
+        user, user_exists = self._get_or_create_user(name, email)
+
+        if user_exists:
+            if self.resend:
+                print("Resending", user)
+            elif self.ignore_existing:
+                print("Ignoring", user)
+                return
+            else:
+                raise Exception("user already exists")
+
         user.set_password(password)
         user.save()
 
@@ -167,18 +178,11 @@ class Command(BaseCommand):
                 "  Password: {}\n\n".format(name, email, password)
             )
 
-        return user
-
     def _get_or_create_user(self, name, email):
         try:
             user = User.objects.get(email=email)
+            return (user, True)
         except User.DoesNotExist:
             # always want to create a new user if none exists
-            return User.objects.create(name=name, email=email)
-
-        if not self.resend:
-            # we haven't been given the command line flag to allow re-using
-            # existing users
-            raise Exception("user already exists")
-        else:
-            return user
+            user = User.objects.create(name=name, email=email)
+            return (user, False)
