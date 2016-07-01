@@ -124,6 +124,7 @@ class CustomerResponseSerializer(serializers.ModelSerializer):
         model = CustomerResponse
         fields = (
             "win",
+            "our_support",
             "access_to_contacts",
             "access_to_information",
             "improved_profile",
@@ -140,6 +141,7 @@ class CustomerResponseSerializer(serializers.ModelSerializer):
             "has_enabled_expansion_into_new_market",
             "has_increased_exports_as_percent_of_turnover",
             "has_enabled_expansion_into_existing_market",
+            "case_study_willing",
             "comments",
             "name",
             "created",
