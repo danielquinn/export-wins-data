@@ -27,6 +27,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        # note this won't work now since we've manually sent some, those
+        # will have to be manually given Notifications to prevent resending
+
+
         two_weeks_ago = timezone.now() - relativedelta(weeks=2)
 
         unnotified_wins = Win.objects.filter(

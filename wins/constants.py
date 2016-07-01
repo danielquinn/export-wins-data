@@ -6,7 +6,7 @@
 from django_countries import countries
 
 EXPERIENCE = (
-    (1, "Not yet exporting"),
+    (1, "Not started exporting yet"),
     (2, "Last 12 months"),
     (3, "More than 1 year, less than 2"),
     (4, "More than 2 years, less than 5"),
@@ -736,13 +736,13 @@ TYPES_OF_SUPPORT = (
 )
 
 WITHOUT_OUR_SUPPORT = (
-    (1, "Would not have achieved any value"),
-    (2, "1% – 20%"),
-    (3, "21% - 40%"),
-    (4, "41% - 60%"),
-    (5, "61% - 80%"),
-    (6, "81% - 99%"),
-    (7, "All of it, the value would have been similar"),
+    (1, "Would not have achieved any export value without your support"),
+    (2, "Would have achieved 1% – 20% of the export value without your support"),
+    (3, "Would have achieved 21% - 40% of the export value without your support"),
+    (4, "Would have achieved 41% - 60% of the export value without your support"),
+    (5, "Would have achieved 61% - 80% of the export value without your support"),
+    (6, "Would have achieved 80% of the export value without your support"),
+    (7, "Would have achieved all of the export value without your support, the value would have been similar"),
 )
 
 # This is redundant, going 1:1 with HQ_TEAM_REGION_OR_POST above

@@ -128,7 +128,11 @@ class Win(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "Export win {}".format(self.pk)
+        return "Export win {}: {} - {}".format(
+            self.pk,
+            self.user,
+            self.created.strftime("%Y-%m-%d %H:%M:%S"),
+        )
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -192,56 +196,61 @@ class Advisor(models.Model):
 
 
 class CustomerResponse(models.Model):
-    """ Customer's response to being asked about an "export win" """
+    """ Customer's response to being asked about a Win (aka Confirmation) """
 
     win = models.OneToOneField(Win, related_name="confirmation")
 
+    our_support = models.PositiveIntegerField(
+        choices=RATINGS,
+        verbose_name="How important was our support in securing the win?"
+    )
     access_to_contacts = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Gained access to contacts not otherwise accessible?"
+        verbose_name="Did you gain access to contacts not otherwise accessible?"
     )
     access_to_information = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Gained access to information or improved understanding "
-                     "of the country?"
+        verbose_name="Did you gain access to information or improved "
+                     "understanding of the country?"
     )
     improved_profile = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Improved your profile or credibility in the country?"
+        verbose_name="Did you improve your profile or credibility in the "
+                     "country?"
     )
     gained_confidence = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Gained the confidence to explore or expand in the "
+        verbose_name="Did you gain the confidence to explore or expand in the "
                      "country?"
     )
     developed_relationships = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Developed and/or nurtured critical relationships?"
+        verbose_name="Did you develop and/or nurture critical relationships?"
     )
     overcame_problem = models.PositiveIntegerField(
         choices=RATINGS,
-        verbose_name="Overcame a problem in the country (eg legal, "
-                     "regulatory, commercial)"
+        verbose_name="Did you overcome a problem in the country (eg legal, "
+                     "regulatory, commercial)?"
     )
 
     involved_state_enterprise = models.BooleanField(
         verbose_name="Did the win involve a foreign government or state-owned "
-                     "enterprise? (e.g. as a customer, an intermediary or "
-                     "facilitator)"
+                     "enterprise (e.g. as a customer, an intermediary or "
+                     "facilitator)?"
     )
     interventions_were_prerequisite = models.BooleanField(
-        verbose_name="Were any of the interventions needed for this win a "
-                     "pre-requisite for the export value to be realised?"
+        verbose_name="Was any of the support we provided a prerequisite for "
+                     "the export value to be realised?"
     )
     support_improved_speed = models.BooleanField(
-        verbose_name="Did our support or intervention(s) help you achieve "
+        verbose_name="Did our support help you achieve "
                      "this win more quickly than you otherwise would have "
                      "done?"
     )
     expected_portion_without_help = models.PositiveIntegerField(
         choices=WITHOUT_OUR_SUPPORT,
-        verbose_name="What proportion of the total expected export value of "
-                     "this win would you have achieved without our support?"
+        verbose_name="What proportion of the total expected export value "
+                     "above would you have achieved without our support?"
     )
     last_export = models.PositiveIntegerField(
         choices=EXPERIENCE,
@@ -249,11 +258,11 @@ class CustomerResponse(models.Model):
     )
     company_was_at_risk_of_not_exporting = models.BooleanField(
         verbose_name="Prior to securing this win, was your company at risk of "
-                     "not exporting?"
+                     "stopping exporting?"
     )
     has_explicit_export_plans = models.BooleanField(
-        verbose_name="Do you have specific plans to export in the next 12 "
-                     "months?"
+        verbose_name="Beyond this win, do you have specific plans to export "
+                     "in the next 12 months?"
     )
     has_enabled_expansion_into_new_market = models.BooleanField(
         verbose_name="Has this win enabled you to expand into a new market?"
@@ -263,9 +272,14 @@ class CustomerResponse(models.Model):
                      "your turnover?"
     )
     has_enabled_expansion_into_existing_market = models.BooleanField(
-        verbose_name="Has this win enabled you to expand into an existing "
-                     "market?"
+        verbose_name="Has this win enabled you to maintain or expand in an "
+                     "existing market?"
     )
+    case_study_willing = models.BooleanField(
+        verbose_name="Would be willing to have your success featured as a UKTI "
+                     "/ Exporting is GREAT case study?"
+    )
+
     comments = models.TextField(blank=True)
     name = models.CharField(max_length=256)
     created = models.DateTimeField(auto_now_add=True)
@@ -293,10 +307,10 @@ class Notification(models.Model):
 
     def __str__(self):
         if self.type == self.TYPE_OFFICER:
-            return "Officer notification to {} regarding {}".format(
-                self.user, self.win)
-        return "Customer notification to {} regarding {}".format(
-            self.recipient, self.win)
+            return "Officer notification to {} regarding Win {} sent {}".format(
+                self.recipient, self.win.id, self.created)
+        return "Customer notification to {} regarding Win {} sent {}".format(
+            self.recipient, self.win.id, self.created)
 
     @classmethod
     def send(cls, win, recipient):

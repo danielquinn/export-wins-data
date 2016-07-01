@@ -7,14 +7,15 @@ from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from django.utils import timezone
 
-from ...models import Win
-from ... import notifications
+from ...models import Win, Notification
+from ...notifications import generate_customer_email, generate_officer_email
 
 
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--ids", type=str)
+        parser.add_argument("--send", action="store_true",)
 
     def handle(self, *args, **options):
         """ Quick hack to generate txt of customer emails and corresponding
@@ -28,39 +29,35 @@ class Command(BaseCommand):
         missing_win_ids = set(given_win_ids) - found_win_ids
         assert not missing_win_ids, "missing win ids: %s" % missing_win_ids
 
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print('CUSTOMER EMAILS:')
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-
         for win in wins:
 
+            # should not be hardcoded
             url = "https://www.exportwins.ukti.gov.uk/wins/review/" + str(win.pk)
-            customer_email_dict = notifications.generate_customer_email(
-                url, win)
+            customer_email_dict = generate_customer_email(url, win)
+            send_mail(
+                customer_email_dict['subject'],
+                customer_email_dict['body'],
+                settings.FEEDBACK_ADDRESS,
+                customer_email_dict['to'],
+            )
+            customer_notification = Notification(
+                type=Notification.TYPE_CUSTOMER,
+                win=win,
+                recipient=customer_email_dict['to'][0],
+            )
+            customer_notification.save()
 
-            print()
-            print(', '.join(customer_email_dict['to']))
-            print()
-            print(customer_email_dict['subject'])
-            print()
-            print(customer_email_dict['body'])
-            print()
-            print('---------------------------------------------------')
-
-        print('\n\n\n\n')
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print('ADVISOR EMAILS:')
-        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        print('\n\n')
-
-        for win in wins:
-            officer_email_dict = notifications.generate_officer_email(win)
-
-            print()
-            print(', '.join(officer_email_dict['to']))
-            print()
-            print(officer_email_dict['subject'])
-            print()
-            print(officer_email_dict['body'])
-            print()
-            print('---------------------------------------------------')
+            officer_email_dict = generate_officer_email(win)
+            send_mail(
+                officer_email_dict['subject'],
+                officer_email_dict['body'],
+                settings.SENDING_ADDRESS,
+                officer_email_dict['to'],
+            )
+            for officer_email in officer_email_dict['to']:
+                officer_notification = Notification(
+                    type=Notification.TYPE_OFFICER,
+                    win=win,
+                    recipient=officer_email,
+                )
+                officer_notification.save()
