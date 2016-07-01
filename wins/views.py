@@ -144,7 +144,7 @@ class CSVView(APIView):
     def get(self, request, format=None):
         bytesio = io.BytesIO()
         zf = zipfile.ZipFile(bytesio, 'w')
-        for table in ['win', 'customerresponse']:
+        for table in ['win', 'customerresponse', 'notification']:
             csv_str = make_csv(table)
             zf.writestr(table + 's.csv', csv_str)
         zf.close()
