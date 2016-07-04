@@ -142,6 +142,7 @@ class CustomerResponseSerializer(serializers.ModelSerializer):
             "has_enabled_expansion_into_new_market",
             "has_increased_exports_as_percent_of_turnover",
             "has_enabled_expansion_into_existing_market",
+            "agree_with_win",
             "case_study_willing",
             "comments",
             "name",

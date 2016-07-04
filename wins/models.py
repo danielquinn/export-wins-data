@@ -279,6 +279,11 @@ class CustomerResponse(models.Model):
         verbose_name="Has this win enabled you to maintain or expand in an "
                      "existing market?"
     )
+    # temporarily nullable for migration - should ultimately be filled in and
+    # turned into a BooleanField
+    agree_with_win = models.NullBooleanField(
+        verbose_name="Do you agree with the win details?",
+    )
     case_study_willing = models.BooleanField(
         verbose_name="Would be willing to have your success featured as a UKTI "
                      "/ Exporting is GREAT case study?"
