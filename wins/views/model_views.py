@@ -20,13 +20,19 @@ class StandardPagination(PageNumberPagination):
     page_size_query_param = "page-size"
 
 
+class BigPagination(PageNumberPagination):
+    page_size = 1000
+    page_size_query_param = "page-size"
+
+
 class WinViewSet(AliceMixin, ModelViewSet):
 
     model = Win
     queryset = Win.objects.all()
     serializer_class = WinSerializer
-    pagination_class = StandardPagination
+    pagination_class = BigPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_fields = ('user', 'user__id')
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
 
