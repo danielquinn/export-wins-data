@@ -14,5 +14,9 @@ class AliceMixin(object):
 
     @list_route(methods=("get",))
     def schema(self, request):
-        return Response(
-            self.metadata_class().get_serializer_info(self.get_serializer()))
+        """ Return metadata about fields of View's serializer """
+
+        serializer = self.get_serializer()
+        metadata_class = self.metadata_class()
+        serializer_metadata = metadata_class.get_serializer_info(serializer)
+        return Response(serializer_metadata)

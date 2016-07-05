@@ -96,6 +96,7 @@ class AdvisorSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = Advisor
         fields = (
+            "win",
             "name",
             "team_type",
             "hq_team",
