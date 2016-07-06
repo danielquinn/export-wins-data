@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 from users.views import LoginView
 from wins.views import (
     WinViewSet, BreakdownViewSet, AdvisorViewSet, ConfirmationViewSet,
-    NotificationViewSet, LimitedWinViewSet, CSVView
+    LimitedWinViewSet, CSVView
 )
 
 router = DefaultRouter()
@@ -14,7 +14,7 @@ router.register(r"limited-wins", LimitedWinViewSet, base_name="limited-win")
 router.register(r"confirmations", ConfirmationViewSet)
 router.register(r"breakdowns", BreakdownViewSet)
 router.register(r"advisors", AdvisorViewSet)
-router.register(r"notifications", NotificationViewSet)
+# router.register(r"notifications", NotificationViewSet)
 
 urlpatterns = [
 

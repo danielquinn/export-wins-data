@@ -10,7 +10,7 @@ from ..filters import CustomerResponseFilterSet
 from ..models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from ..serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
-    AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
+    AdvisorSerializer, CustomerResponseSerializer
 )
 from alice.views import AliceMixin
 
@@ -36,6 +36,26 @@ class WinViewSet(AliceMixin, ModelViewSet):
     ordering_fields = ("pk",)
     http_method_names = ("get", "post", "put")
 
+    def _notify_if_complete(self, instance):
+        if instance.complete:
+            notification = Notification(
+                win=instance,
+                user=self.request.user,
+                recipient=instance.customer_email_address,
+                type=Notification.TYPE_CUSTOMER,
+            )
+            notification.save()
+            notifications.send_customer_email(instance)
+            # probablly also officer email?
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        self._notify_if_complete(instance)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        self._notify_if_complete(instance)
+
 
 class LimitedWinViewSet(WinViewSet):
 
@@ -56,23 +76,23 @@ class LimitedWinViewSet(WinViewSet):
         )
 
 
-class NotificationViewSet(ModelViewSet):
-    """ Endpoint to instruct data server to notify officer or customer """
+# class NotificationViewSet(ModelViewSet):
+#     """ Endpoint to instruct data server to notify officer or customer """
 
-    model = Notification
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
-    permission_classes = (AllowAny,)
-    pagination_class = StandardPagination
-    http_method_names = ("post",)
+#     model = Notification
+#     queryset = Notification.objects.all()
+#     serializer_class = NotificationSerializer
+#     permission_classes = (AllowAny,)
+#     pagination_class = StandardPagination
+#     http_method_names = ("post",)
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        if instance.type == Notification.TYPE_OFFICER:
-            notifications.send_intermediate_officer_email(instance.win)
-        # elif instance.type == Notification.TYPE_CUSTOMER:
-        #     notifications.send_customer_email(self.request, instance.win)
-        return instance
+#     def perform_create(self, serializer):
+#         instance = serializer.save()
+#         if instance.type == Notification.TYPE_OFFICER:
+#             notifications.send_intermediate_officer_email(instance.win)
+#         # elif instance.type == Notification.TYPE_CUSTOMER:
+#         #     notifications.send_customer_email(self.request, instance.win)
+#         return instance
 
 
 class ConfirmationViewSet(ModelViewSet):

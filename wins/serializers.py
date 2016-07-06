@@ -1,11 +1,11 @@
-from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer, CharField, EmailField
 
 from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
 
 
-class WinSerializer(serializers.ModelSerializer):
+class WinSerializer(ModelSerializer):
 
-    id = serializers.CharField(read_only=True)
+    id = CharField(read_only=True)
 
     class Meta(object):
         model = Win
@@ -49,19 +49,34 @@ class WinSerializer(serializers.ModelSerializer):
             "hq_team",
             "location",
             "created",
+            "complete",
         )
 
     def validate_user(self, value):
         return self.context["request"].user
 
+    # def create(self, validated_data):
+    #     instance = ModelSerializer.create(self, validated_data)
+    #     if validated_data['complete']:
+    #         # send notification
+    #         print('notifyyyy')
+    #     return instance
 
-class LimitedWinSerializer(serializers.ModelSerializer):
+    # def update(self, instance, validated_data):
+    #     ModelSerializer.update(self, instance, validated_data)
+    #     if validated_data['complete']:
+    #         # send notification
+    #         print('notifyyyy')
+    #     return instance
 
-    id = serializers.CharField(read_only=True)
-    type = serializers.CharField(source="get_type_display")
-    country = serializers.CharField(source="country.name")
-    customer_location = serializers.CharField(source="get_customer_location_display")
-    goods_vs_services = serializers.CharField(source="get_goods_vs_services_display")
+
+class LimitedWinSerializer(ModelSerializer):
+
+    id = CharField(read_only=True)
+    type = CharField(source="get_type_display")
+    country = CharField(source="country.name")
+    customer_location = CharField(source="get_customer_location_display")
+    goods_vs_services = CharField(source="get_goods_vs_services_display")
 
     class Meta(object):
         model = Win
@@ -79,7 +94,7 @@ class LimitedWinSerializer(serializers.ModelSerializer):
         )
 
 
-class BreakdownSerializer(serializers.ModelSerializer):
+class BreakdownSerializer(ModelSerializer):
 
     class Meta(object):
         model = Breakdown
@@ -91,7 +106,7 @@ class BreakdownSerializer(serializers.ModelSerializer):
         )
 
 
-class AdvisorSerializer(serializers.ModelSerializer):
+class AdvisorSerializer(ModelSerializer):
 
     class Meta(object):
         model = Advisor
@@ -104,22 +119,22 @@ class AdvisorSerializer(serializers.ModelSerializer):
         )
 
 
-class NotificationSerializer(serializers.ModelSerializer):
+# class NotificationSerializer(ModelSerializer):
 
-    recipient = serializers.EmailField(required=False)
+#     recipient = EmailField(required=False)
 
-    class Meta(object):
-        model = Notification
-        fields = (
-            "win",
-            "user",
-            "recipient",
-            "type",
-            "created"
-        )
+#     class Meta(object):
+#         model = Notification
+#         fields = (
+#             "win",
+#             "user",
+#             "recipient",
+#             "type",
+#             "created"
+#         )
 
 
-class CustomerResponseSerializer(serializers.ModelSerializer):
+class CustomerResponseSerializer(ModelSerializer):
 
     class Meta(object):
         model = CustomerResponse

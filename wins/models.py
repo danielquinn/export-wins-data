@@ -122,6 +122,7 @@ class Win(models.Model):
     )
     location = models.CharField(max_length=128, blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    complete = models.BooleanField()
 
     def __str__(self):
         return "Export win {}: {} - {}".format(
@@ -318,3 +319,8 @@ class Notification(models.Model):
     @classmethod
     def send(cls, win, recipient):
         cls.objects.create(win=win, recipient=recipient)
+        if self.type == self.TYPE_OFFICER:
+            return "Officer notification to {} regarding Win {} sent {}".format(
+                self.recipient, self.win.id, self.created)
+        return "Customer notification to {} regarding Win {} sent {}".format(
+            self.recipient, self.win.id, self.created)
