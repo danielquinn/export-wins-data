@@ -178,12 +178,8 @@ class Breakdown(models.Model):
 
 
 class Advisor(models.Model):
-    """
-    At least one!
-    Should this be n:1 or 1:1? The latter is easier, but there's no sense in
-    doing that if we'll just have to change it soon.
-    """
 
+    win = models.ForeignKey(Win, related_name="advisors")
     name = models.CharField(max_length=128)
     team_type = models.CharField(max_length=128, choices=TEAMS)
     hq_team = models.CharField(
@@ -194,6 +190,14 @@ class Advisor(models.Model):
     location = models.CharField(
         max_length=128, verbose_name="Location (if applicable)")
 
+    def __str__(self):
+        return "Win: {} - Advisor Name: {}, Team {} - {}, Location: {}".format(
+                self.win,
+                self.name,
+                dict(TEAMS)[self.team_type],
+                dict(HQ_TEAM_REGION_OR_POST)[self.hq_team],
+                self.location,
+            )
 
 class CustomerResponse(models.Model):
     """ Customer's response to being asked about a Win (aka Confirmation) """
