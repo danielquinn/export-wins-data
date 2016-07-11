@@ -55,20 +55,6 @@ class WinSerializer(ModelSerializer):
     def validate_user(self, value):
         return self.context["request"].user
 
-    # def create(self, validated_data):
-    #     instance = ModelSerializer.create(self, validated_data)
-    #     if validated_data['complete']:
-    #         # send notification
-    #         print('notifyyyy')
-    #     return instance
-
-    # def update(self, instance, validated_data):
-    #     ModelSerializer.update(self, instance, validated_data)
-    #     if validated_data['complete']:
-    #         # send notification
-    #         print('notifyyyy')
-    #     return instance
-
 
 class LimitedWinSerializer(ModelSerializer):
 

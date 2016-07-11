@@ -34,19 +34,22 @@ class WinViewSet(AliceMixin, ModelViewSet):
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_fields = ('id', 'user__id')
     ordering_fields = ("pk",)
-    http_method_names = ("get", "post", "put")
+    http_method_names = ("get", "post", "put", "patch")
 
     def _notify_if_complete(self, instance):
-        if instance.complete:
-            notification = Notification(
-                win=instance,
-                user=self.request.user,
-                recipient=instance.customer_email_address,
-                type=Notification.TYPE_CUSTOMER,
-            )
-            notification.save()
-            notifications.send_customer_email(instance)
-            # probablly also officer email?
+        """ If the form is marked 'complete', email customer for response """
+
+        if not instance.complete:
+            return
+
+        notification = Notification(
+            win=instance,
+            user=self.request.user,
+            recipient=instance.customer_email_address,
+            type=Notification.TYPE_CUSTOMER,
+        )
+        notification.save()
+        notifications.send_customer_email(instance)
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -76,25 +79,6 @@ class LimitedWinViewSet(WinViewSet):
         )
 
 
-# class NotificationViewSet(ModelViewSet):
-#     """ Endpoint to instruct data server to notify officer or customer """
-
-#     model = Notification
-#     queryset = Notification.objects.all()
-#     serializer_class = NotificationSerializer
-#     permission_classes = (AllowAny,)
-#     pagination_class = StandardPagination
-#     http_method_names = ("post",)
-
-#     def perform_create(self, serializer):
-#         instance = serializer.save()
-#         if instance.type == Notification.TYPE_OFFICER:
-#             notifications.send_intermediate_officer_email(instance.win)
-#         # elif instance.type == Notification.TYPE_CUSTOMER:
-#         #     notifications.send_customer_email(self.request, instance.win)
-#         return instance
-
-
 class ConfirmationViewSet(ModelViewSet):
 
     model = CustomerResponse
@@ -113,6 +97,8 @@ class ConfirmationViewSet(ModelViewSet):
             self.metadata_class().get_serializer_info(self.get_serializer()))
 
     def perform_create(self, serializer):
+        """ Send officer notification when customer responds """
+
         instance = serializer.save()
         notifications.send_officer_notification_of_customer_response(instance)
         return instance
