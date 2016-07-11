@@ -122,6 +122,7 @@ class Win(models.Model):
     )
     location = models.CharField(max_length=128, blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
     complete = models.BooleanField()
 
     def __str__(self):
