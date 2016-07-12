@@ -125,27 +125,26 @@ class AdvisorViewSet(AliceMixin, ModelViewSet):
     http_method_names = ("get", "post")
 
 
-def make_csv(table):
-    """ Get CSV of table """
-
-    stringio = io.StringIO()
-    cursor = connection.cursor()
-    cursor.execute("select * from wins_{};".format(table))
-    csv_writer = csv.writer(stringio)
-    header = [i[0] for i in cursor.description]
-    csv_writer.writerow(header)
-    csv_writer.writerows(cursor)
-    return stringio.getvalue()
-
-
 class CSVView(APIView):
     permission_classes = (permissions.IsAdminUser,)
+
+    def make_csv(self, table):
+        """ Get CSV of table """
+
+        stringio = io.StringIO()
+        cursor = connection.cursor()
+        cursor.execute("select * from wins_{};".format(table))
+        csv_writer = csv.writer(stringio)
+        header = [i[0] for i in cursor.description]
+        csv_writer.writerow(header)
+        csv_writer.writerows(cursor)
+        return stringio.getvalue()
 
     def get(self, request, format=None):
         bytesio = io.BytesIO()
         zf = zipfile.ZipFile(bytesio, 'w')
-        for table in ['win', 'customerresponse', 'notification']:
-            csv_str = make_csv(table)
+        for table in ['win', 'customerresponse', 'notification', 'advisor']:
+            csv_str = self.make_csv(table)
             zf.writestr(table + 's.csv', csv_str)
         zf.close()
         return HttpResponse(bytesio.getvalue())
