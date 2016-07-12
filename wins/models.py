@@ -188,16 +188,20 @@ class Advisor(models.Model):
         choices=HQ_TEAM_REGION_OR_POST
     )
     location = models.CharField(
-        max_length=128, verbose_name="Location (if applicable)")
+        max_length=128,
+        verbose_name="Location (if applicable)",
+        blank=True,
+    )
 
     def __str__(self):
         return "Win: {} - Advisor Name: {}, Team {} - {}, Location: {}".format(
-                self.win,
-                self.name,
-                dict(TEAMS)[self.team_type],
-                dict(HQ_TEAM_REGION_OR_POST)[self.hq_team],
-                self.location,
-            )
+            self.win,
+            self.name,
+            dict(TEAMS)[self.team_type],
+            dict(HQ_TEAM_REGION_OR_POST)[self.hq_team],
+            self.location,
+        )
+
 
 class CustomerResponse(models.Model):
     """ Customer's response to being asked about a Win (aka Confirmation) """
