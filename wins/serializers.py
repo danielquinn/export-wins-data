@@ -1,6 +1,6 @@
-from rest_framework.serializers import ModelSerializer, CharField, EmailField
+from rest_framework.serializers import ModelSerializer, CharField
 
-from .models import Win, Breakdown, Advisor, CustomerResponse, Notification
+from .models import Win, Breakdown, Advisor, CustomerResponse
 
 
 class WinSerializer(ModelSerializer):
@@ -103,21 +103,6 @@ class AdvisorSerializer(ModelSerializer):
             "hq_team",
             "location"
         )
-
-
-# class NotificationSerializer(ModelSerializer):
-
-#     recipient = EmailField(required=False)
-
-#     class Meta(object):
-#         model = Notification
-#         fields = (
-#             "win",
-#             "user",
-#             "recipient",
-#             "type",
-#             "created"
-#         )
 
 
 class CustomerResponseSerializer(ModelSerializer):
