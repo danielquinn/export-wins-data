@@ -122,5 +122,6 @@ class AdvisorViewSet(AliceMixin, ModelViewSet):
     serializer_class = AdvisorSerializer
     pagination_class = StandardPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_fields = ('win__id',)
     ordering_fields = ("pk",)
     http_method_names = ("get", "post")
