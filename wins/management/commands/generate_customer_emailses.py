@@ -40,7 +40,7 @@ class Command(BaseCommand):
             id_emails = [idemail.split(':')
                          for idemail in idemails.split(',') if idemail]
             id_to_email = {
-                wid.replace('-', ''): email
+                wid.replace('-', ''): email.lower()
                 for wid, email in id_emails
             }
             wins = self.thing(list(id_to_email.keys()))
