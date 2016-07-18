@@ -104,6 +104,7 @@ class AlicePermissionTestCase(TestCase):
             "overcame_problem": "1",
             "developed_relationships": "1",
             "access_to_contacts": "1",
+            "our_support": "1",
         }
 
         self.BREAKDOWNS_POST_SAMPLE = {
@@ -114,6 +115,7 @@ class AlicePermissionTestCase(TestCase):
         }
 
         self.ADVISORS_POST_SAMPLE = {
+            "win": str(self.win.pk),
             "name": "bob",
             "team_type": "other",
             "hq_team": "team:1",
