@@ -55,16 +55,23 @@ class CSVView(APIView):
         win_dicts = []
         for win in wins:
             win_dict = collections.OrderedDict()
+
+            # local fields
             for field in WinSerializer().fields:
                 win_dict[field] = getattr(win, field)
+
+            # remote fields
             for name, func in fkeys:
                 win_dict.update([(name, func(getattr(win, name)))])
+
             try:
-                getattr(win, 'confirmation')
+                getattr(win, 'confirmation') # customer response case
                 win_dict.update([('confirmation', True)])
             except (CustomerResponse.DoesNotExist,) as exc:
                 win_dict.update([('confirmation', False)])
+
             win_dicts.append(win_dict)
+
         csv_writer = csv.DictWriter(stringio, win_dicts[0].keys())
         csv_writer.writeheader()
         csv_writer.writerows(win_dicts)
