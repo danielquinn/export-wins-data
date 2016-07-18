@@ -74,7 +74,8 @@ class CSVView(APIView):
 
         csv_writer = csv.DictWriter(stringio, win_dicts[0].keys())
         csv_writer.writeheader()
-        csv_writer.writerows(win_dicts)
+        for win_dict in win_dicts:
+            csv_writer.writerow(win_dict)
         return stringio.getvalue()
 
     def get(self, request, format=None):
