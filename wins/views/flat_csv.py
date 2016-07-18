@@ -16,21 +16,12 @@ from ..serializers import (
 )
 
 
-def flatten_user(attr):
-    return "{0} <{1}>".format(attr.name, attr.email)
-
-
-def flatten_advisors(attr):
-    return ', '.join(map(str, attr.all()))
-
-
-def flatten_breakdowns(attr):
-    return ', '.join(map(str, attr.all()))
-
-
-def flatten_notifications(attr):
-    return any([x.type == 'c' for x in attr.all()])
-
+FKEY_FN = (
+    ('user', lambda attr: "{0} <{1}>".format(attr.name, attr.email)),
+    ('advisors', lambda attr: ', '.join(map(str, attr.all()))),
+    ('breakdowns', lambda attr: ', '.join(map(str, attr.all()))),
+    ('notifications', lambda attr: any([x.type == 'c' for x in attr.all()])),
+)
 
 class CSVView(APIView):
     permission_classes = (permissions.IsAdminUser,)
@@ -44,12 +35,6 @@ class CSVView(APIView):
 
     def make_csv(self):
         """ Get CSV of table """
-        fkeys = [
-            ('user', flatten_user),
-            ('advisors', flatten_advisors),
-            ('breakdowns', flatten_breakdowns),
-            ('notifications', flatten_notifications),
-        ]
         stringio = io.StringIO()
         wins = Win.objects.all()
         win_dicts = []
@@ -61,7 +46,7 @@ class CSVView(APIView):
                 win_dict[field] = getattr(win, field)
 
             # remote fields
-            for name, func in fkeys:
+            for name, func in FKEY_FN:
                 win_dict.update([(name, func(getattr(win, name)))])
 
             try:
