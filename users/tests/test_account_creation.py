@@ -25,14 +25,14 @@ class AccountCreationTestCase(TestCase):
         path = "users.management.commands.account_creation.Command.send"
         with mock.patch(path):
             email = "test.name@example.com"
-            Command()._create_user("Name", email, "password")
+            Command()._handle_user("Name", email, "password")
             self.assertEqual(User.objects.get(email=email).name, "Name")
 
     def test_create_interesting_user(self):
         path = "users.management.commands.account_creation.Command.send"
         with mock.patch(path):
             email = "test.name@example.com"
-            Command()._create_user("Ναμε", email, "password")
+            Command()._handle_user("Ναμε", email, "password")
             self.assertEqual(User.objects.get(email=email).name, "Ναμε")
 
     def test_handle_single(self):
