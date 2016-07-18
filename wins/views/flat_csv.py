@@ -32,10 +32,6 @@ def flatten_notifications(attr):
     return any([x.type == 'c' for x in attr.all()])
 
 
-def flatten_confirmation(attr):
-    return True  # isn’t called unless the field is present
-
-
 class CSVView(APIView):
     permission_classes = (permissions.IsAdminUser,)
 
@@ -53,7 +49,6 @@ class CSVView(APIView):
             ('advisors', flatten_advisors),
             ('breakdowns', flatten_breakdowns),
             ('notifications', flatten_notifications),
-            ('confirmation', flatten_confirmation),
         ]
         stringio = io.StringIO()
         wins = Win.objects.all()
@@ -63,10 +58,12 @@ class CSVView(APIView):
             for field in WinSerializer().fields:
                 win_dict[field] = getattr(win, field)
             for name, func in fkeys:
-                try:
-                    win_dict.update([(name, func(getattr(win, name)))])
-                except (CustomerResponse.DoesNotExist,) as exc:
-                    win_dict.update([('confirmation', False)])
+                win_dict.update([(name, func(getattr(win, name)))])
+            try:
+                getattr(win, 'confirmation')
+                win_dict.update([('confirmation', True)])
+            except (CustomerResponse.DoesNotExist,) as exc:
+                win_dict.update([('confirmation', False)])
             win_dicts.append(win_dict)
         csv_writer = csv.DictWriter(stringio, win_dicts[0].keys())
         csv_writer.writeheader()
