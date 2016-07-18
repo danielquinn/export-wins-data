@@ -156,6 +156,9 @@ class Breakdown(models.Model):
     `total_expected_non_export_value`.
     """
 
+    class Meta:
+        ordering = ["year"]
+
     TYPE_EXPORT = 1
     TYPE_NON_EXPORT = 2
     TYPES = (
@@ -194,8 +197,7 @@ class Advisor(models.Model):
     )
 
     def __str__(self):
-        return "Win: {} - Advisor Name: {}, Team {} - {}, Location: {}".format(
-            self.win,
+        return "Name: {0}, Team {1} - {2}, Location: {3}".format(
             self.name,
             dict(TEAMS)[self.team_type],
             dict(HQ_TEAM_REGION_OR_POST)[self.hq_team],
