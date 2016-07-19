@@ -4,8 +4,10 @@ import factory
 import faker
 
 from wins.models import Win, Breakdown, Advisor, CustomerResponse, Notification
+from wins.constants import WIN_TYPES
 from users.factories import UserFactory
 
+TYPES_DICT = {y: x for x, y in WIN_TYPES}
 
 class WinFactory(factory.DjangoModelFactory):
 
@@ -54,7 +56,7 @@ class BreakdownFactory(factory.DjangoModelFactory):
     class Meta:
         model = Breakdown
 
-    type = Breakdown.TYPE_EXPORT
+    type = TYPES_DICT['Export Win']
     year = 2016
     value = 2718281828459045
 

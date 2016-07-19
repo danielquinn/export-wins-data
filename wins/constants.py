@@ -716,10 +716,20 @@ HQ_TEAM_REGION_OR_POST = tuple([
 
 ] + sorted([("post:{}".format(c[0]), str(c[1])) for c in countries.countries.items()], key=lambda x: x[1]))  # Attach standard countries list
 
-TYPES = (
+WIN_TYPES = (
     (1, "Export Win"),
     (2, "Non-Export Win"),
     (3, "Mixed - Export and Non-Export Wins"),
+)
+
+BREAKDOWN_TYPES = (
+    (1, "Export"),
+    (2, "Non-export"),
+)
+
+NOTIFICATION_TYPES = (
+    ('o', 'Officer'),
+    ('c', 'Customer'),
 )
 
 TYPES_OF_SUPPORT = (
