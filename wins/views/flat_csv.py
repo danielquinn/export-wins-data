@@ -10,16 +10,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..models import Win, Breakdown, Advisor, CustomerResponse, Notification
-from ..serializers import (
-    WinSerializer, LimitedWinSerializer, BreakdownSerializer,
-    AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
-)
+from ..serializers import WinSerializer
 
+def join(attr):
+    'Dumb flattening join for fkey'
+    return ', '.join(map(str, attr.all()))
 
 FKEY_FN = (
-    ('user', lambda attr: "{0} <{1}>".format(attr.name, attr.email)),
-    ('advisors', lambda attr: ', '.join(map(str, attr.all()))),
-    ('breakdowns', lambda attr: ', '.join(map(str, attr.all()))),
+    ('user', lambda user: str(user)),
+    ('advisors', join),
+    ('breakdowns', join),
     ('notifications', lambda attr: any([x.type == 'c' for x in attr.all()])),
 )
 
@@ -49,7 +49,7 @@ class CSVView(APIView):
                     attr = display_fn()
                 except AttributeError:
                     attr = getattr(win, field_name)
-                win_dict[field_name] = attr
+                win_dict[field_name] = str(attr)
 
             # remote fields
             for name, func in FKEY_FN:

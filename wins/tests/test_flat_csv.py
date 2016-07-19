@@ -12,6 +12,7 @@ from ..factories import (
     NotificationFactory,
     WinFactory,
 )
+from ..serializers import WinSerializer
 from alice.tests.client import AliceClient
 from users.factories import UserFactory
 from wins.views.flat_csv import CSVView
@@ -46,9 +47,24 @@ class TestFlatCSV(TestCase):
         self._assert_about_win_dict(win_dict)
 
     def test_direct_call(self):
-        win_dict = list(csv.DictReader(CSVView().make_csv().split()))[0]
+        win_dict = list(csv.DictReader(CSVView().make_csv().split('\n')))[0]
         self._assert_about_win_dict(win_dict)
 
     def _assert_about_win_dict(self, win_dict):
-        self.assertEquals(win_dict['id'], self.win.id)
-
+        for field_name in WinSerializer().fields:
+            try:
+                self.assertEquals(
+                    win_dict[field_name],
+                    str(getattr(self.win, field_name)),
+                )
+            except:
+                try:
+                    display_fn = getattr(
+                        self.win, "get_{0}_display".format(field_name)
+                    )
+                except:
+                    if field_name == 'date':
+                        self.assertEquals(
+                            win_dict[field_name],
+                            str(getattr(self.win, field_name))[:10],
+                        )
