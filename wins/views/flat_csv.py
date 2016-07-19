@@ -34,16 +34,22 @@ class CSVView(APIView):
         return Response(serializer_metadata)
 
     def make_csv(self):
-        """ Get CSV of table """
-        stringio = io.StringIO()
+        'Get CSV of table'
         wins = Win.objects.all()
         win_dicts = []
         for win in wins:
             win_dict = collections.OrderedDict()
 
             # local fields
-            for field in WinSerializer().fields:
-                win_dict[field] = getattr(win, field)
+            for field_name in WinSerializer().fields:
+                try:
+                    display_fn = getattr(
+                        win, "get_{0}_display".format(field_name)
+                    )
+                    attr = display_fn()
+                except AttributeError:
+                    attr = getattr(win, field_name)
+                win_dict[field_name] = attr
 
             # remote fields
             for name, func in FKEY_FN:
@@ -57,6 +63,7 @@ class CSVView(APIView):
 
             win_dicts.append(win_dict)
 
+        stringio = io.StringIO()
         csv_writer = csv.DictWriter(stringio, win_dicts[0].keys())
         csv_writer.writeheader()
         for win_dict in win_dicts:
