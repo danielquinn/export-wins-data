@@ -15,7 +15,8 @@ from ..factories import (
 from ..serializers import WinSerializer
 from alice.tests.client import AliceClient
 from users.factories import UserFactory
-from wins.views.flat_csv import CSVView
+from wins.views.flat_csv import CSVView, get_field
+from wins.models import Win
 
 class TestFlatCSV(TestCase):
 
@@ -65,6 +66,6 @@ class TestFlatCSV(TestCase):
                 except:
                     if field_name == 'date':
                         self.assertEquals(
-                            win_dict[field_name],
+                            win_dict[get_field(Win, field_name).verbose_name],
                             str(getattr(self.win, field_name))[:10],
                         )

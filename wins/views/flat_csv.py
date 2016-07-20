@@ -11,17 +11,42 @@ from rest_framework.views import APIView
 
 from ..models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from ..serializers import WinSerializer
-
-def join(attr):
-    'Dumb flattening join for fkey'
-    return ', '.join(map(str, attr.all()))
+from ..constants import BREAKDOWN_TYPES
 
 FKEY_FN = (
     ('user', lambda user: str(user)),
-    ('advisors', join),
-    ('breakdowns', join),
+    ('advisors', lambda advisors: ', '.join(map(str, advisors.all()))),
     ('notifications', lambda attr: any([x.type == 'c' for x in attr.all()])),
 )
+
+def extract_breakdowns(win):
+    breakdowns = win.breakdowns.all()
+    retval = []
+    for type_, name in BREAKDOWN_TYPES:
+        type_breakdowns = sorted(
+            filter(
+                lambda breakdown: breakdown.type == type_, breakdowns
+            ),
+            key=lambda breakdown: breakdown.year
+        )
+        for index in range(5):
+            try:
+                breakdown = "{0}: {1}".format(
+                    type_breakdowns[index].year,
+                    type_breakdowns[index].value / 1000
+                )
+            except IndexError:
+                breakdown = None
+            retval.append((
+                "{0} breakdown {1}".format(name, index + 1),
+                breakdown,
+            ))
+    return retval
+
+def get_field(Model, name):
+    return next(
+        filter(lambda field: field.name == name, Win._meta.fields)
+    )
 
 class CSVView(APIView):
     permission_classes = (permissions.IsAdminUser,)
@@ -42,6 +67,7 @@ class CSVView(APIView):
 
             # local fields
             for field_name in WinSerializer().fields:
+                field = get_field(Win, field_name)
                 try:
                     display_fn = getattr(
                         win, "get_{0}_display".format(field_name)
@@ -49,17 +75,20 @@ class CSVView(APIView):
                     attr = display_fn()
                 except AttributeError:
                     attr = getattr(win, field_name)
-                win_dict[field_name] = str(attr)
+
+                win_dict[field.verbose_name or field.name] = str(attr)
 
             # remote fields
             for name, func in FKEY_FN:
                 win_dict.update([(name, func(getattr(win, name)))])
 
             try:
-                getattr(win, 'confirmation') # customer response case
-                win_dict.update([('confirmation', True)])
+                response = getattr(win, 'confirmation')
+                win_dict.update([('confirmation', response.agree_with_win)])
             except (CustomerResponse.DoesNotExist,) as exc:
                 win_dict.update([('confirmation', False)])
+
+            win_dict.update(extract_breakdowns(win))
 
             win_dicts.append(win_dict)
 
