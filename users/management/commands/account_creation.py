@@ -160,7 +160,16 @@ class Command(BaseCommand):
             if self.resend:
                 print("Resending", user)
             elif self.ignore_existing:
-                print("Ignoring", user)
+                print(
+                    "Ignoring",
+                    user,
+                    '-',
+                    user.email,
+                    '-',
+                    'date added:', user.date_joined.strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
+                )
                 return
             else:
                 raise Exception("user already exists")
