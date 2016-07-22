@@ -7,7 +7,9 @@ from wins.models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from wins.constants import WIN_TYPES
 from users.factories import UserFactory
 
+
 TYPES_DICT = {y: x for x, y in WIN_TYPES}
+
 
 class WinFactory(factory.DjangoModelFactory):
 
