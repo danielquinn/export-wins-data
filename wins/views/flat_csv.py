@@ -36,7 +36,7 @@ class CSVView(APIView):
                 try:
                     breakdown = "{0}: {1}k".format(
                         type_breakdowns[index].year,
-                        type_breakdowns[index].value / 1000
+                        int(type_breakdowns[index].value / 1000),
                     )
                 except IndexError:
                     breakdown = None
@@ -80,11 +80,15 @@ class CSVView(APIView):
         win_dict['advisors'] = ', '.join(map(str, win.advisors.all()))
         win_dict['notifications'] = bool(win.notifications.filter(type='c'))
         try:
-            # todo - handling for backlog
-            response = getattr(win, 'confirmation')
-            win_dict.update([('confirmation', response.agree_with_win)])
+            getattr(win, 'confirmation')
+            confirmed = True  # just record if customer has responded for now
+            # if response.agree_with_win is None:
+            #     confirmed = 'N/A'
+            # else:
+            #     confirmed = response.agree_with_win
         except CustomerResponse.DoesNotExist:
-            win_dict.update([('confirmation', False)])
+            confirmed = False
+        win_dict['confirmation'] = confirmed
         win_dict.update(self._extract_breakdowns(win))
 
         return win_dict

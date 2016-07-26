@@ -192,7 +192,7 @@ class Advisor(models.Model):
             self.name,
             dict(constants.TEAMS)[self.team_type],
             dict(constants.HQ_TEAM_REGION_OR_POST)[self.hq_team],
-            self.location,
+            self.location or 'N/A',
         )
 
 

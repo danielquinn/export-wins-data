@@ -1,17 +1,8 @@
-import collections
-import csv
-import io
-import zipfile
-
-from django.http import HttpResponse
-
-from rest_framework import authentication, permissions
 from rest_framework.decorators import list_route
 from rest_framework.filters import DjangoFilterBackend, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from .. import notifications
@@ -21,7 +12,6 @@ from ..serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
     AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
 )
-from alice.authenticators import AlicePermission
 from alice.views import AliceMixin
 
 
