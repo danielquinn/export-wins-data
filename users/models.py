@@ -32,7 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         PermissionsMixin.__init__(self, *args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return "{0} <{1}>".format(self.name, self.email)
 
     def get_short_name(self):
         return self.name
