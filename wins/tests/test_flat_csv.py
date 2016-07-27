@@ -95,19 +95,10 @@ class TestFlatCSV(TestCase):
 6e18a056-1a25-46ce-a4bb-0553a912706d,Johnny Fakeman <jfakeman@example.com>,company name,cdms reference,customer name,customer job title,customer@email.address,East Midlands,,description,,,2016-05-25,Canada,Export Win,1,1,Goods,Advanced Engineering,True,AER-01: Global Aerospace,True,True,Market entry advice and support – UKTI/FCO in UK,None,None,None,None,None,True,True,lead officer name,,,line manager name,Trade (TD or ST),TD - Events - Financial & Professional Business Services,location,{created2},,False,False,,,,,,,,,,\r'''\
             .format(created1=self.win1.created, created2=self.win2.created).split('\n')
 
-        # # all headings should match
-        # self.assertEqual(actual_lines[0], expected_lines[0])
-
-        # index_colpairs = enumerate(
-        #     zip(actual_lines[1].split(','), expected_lines[1].split(','))
-        # )
-        # for index, (actual_col, expected_col) in index_colpairs:
-        #     self.assertEqual(actual_col, expected_col)
-
         for actual_line, expected_line in zip(actual_lines, expected_lines):
-            for actual_col, expected_col in zip(actual_line.split(','), expected_line.split(',')):
+            zipped_cols = zip(actual_line.split(','), expected_line.split(','))
+            for actual_col, expected_col in zipped_cols:
                 self.assertEqual(actual_col, expected_col)
-
 
     def _assert_about_win_dict(self, win_dict):
         for field_name in WinSerializer().fields:
