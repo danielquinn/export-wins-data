@@ -97,7 +97,14 @@ class CSVView(APIView):
     def _make_csv(self):
         """ Make CSV of all Wins, with non-local data flattened """
 
-        wins = Win.objects.all().exclude(
+        wins = Win.objects.all(
+        ).select_related(
+            'user',
+        ).prefetch_related(
+            'advisors',
+            'notifications',
+            'confirmation',
+        ).exclude(
             user__email__in=[
                 'adam.malinowski@digital.bis.gov.uk',
                 'daniel.quinn@digital.bis.gov.uk',

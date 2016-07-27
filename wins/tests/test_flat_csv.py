@@ -79,7 +79,7 @@ class TestFlatCSV(TestCase):
         client.login(username=user.email, password='asdf')
         resp = client.get(self.url)
         zf = zipfile.ZipFile(io.BytesIO(resp.content), 'r')
-        csv_path = zf.extract('wins.csv', tempfile.mkdtemp())
+        csv_path = zf.extract('wins_complete.csv', tempfile.mkdtemp())
         with open(csv_path, 'r') as csv_fh:
             win_dict = list(csv.DictReader(csv_fh))[0]
         self._assert_about_win_dict(win_dict)
