@@ -11,9 +11,10 @@ from django.http import HttpResponse
 from rest_framework import permissions
 from rest_framework.views import APIView
 
-from ..models import Win, CustomerResponse
-from ..serializers import WinSerializer
 from ..constants import BREAKDOWN_TYPES
+from ..models import CustomerResponse, Win
+from ..serializers import WinSerializer
+from users .models import User
 
 
 class CSVView(APIView):
@@ -96,7 +97,7 @@ class CSVView(APIView):
 
         return win_dict
 
-    def _make_csv(self):
+    def _make_flat_wins_csv(self):
         """ Make CSV of all Wins, with non-local data flattened """
 
         wins = Win.objects.all(
@@ -123,6 +124,19 @@ class CSVView(APIView):
             csv_writer.writerow(win_dict)
         return stringio.getvalue()
 
+    def _make_user_csv(self):
+        users = User.objects.all()
+        user_dicts = [
+            {'name': u.name, 'email': u.email, 'joined': u.date_joined}
+            for u in users
+        ]
+        stringio = io.StringIO()
+        csv_writer = csv.DictWriter(stringio, user_dicts[0].keys())
+        csv_writer.writeheader()
+        for user_dict in user_dicts:
+            csv_writer.writerow(user_dict)
+        return stringio.getvalue()
+
     def _make_plain_csv(self, table):
         """ Get CSV of table """
 
@@ -141,7 +155,9 @@ class CSVView(APIView):
         for table in ['win', 'customerresponse', 'notification', 'advisor']:
             csv_str = self._make_plain_csv(table)
             zf.writestr(table + 's.csv', csv_str)
-        full_csv_str = self._make_csv()
+        full_csv_str = self._make_flat_wins_csv()
         zf.writestr('wins_complete.csv', full_csv_str)
+        user_csv_str = self._make_user_csv()
+        zf.writestr('users.csv', user_csv_str)
         zf.close()
         return HttpResponse(bytesio.getvalue())
