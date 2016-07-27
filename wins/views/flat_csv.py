@@ -4,6 +4,7 @@ import io
 import zipfile
 from operator import attrgetter
 
+from django.db import connection
 from django.http import HttpResponse
 
 from rest_framework import permissions
@@ -94,9 +95,14 @@ class CSVView(APIView):
         return win_dict
 
     def _make_csv(self):
-        """ Make CSV of all Wins """
+        """ Make CSV of all Wins, with non-local data flattened """
 
-        wins = Win.objects.all()
+        wins = Win.objects.all().exclude(
+            user__email__in=[
+                'adam.malinowski@digital.bis.gov.uk',
+                'daniel.quinn@digital.bis.gov.uk',
+            ]
+        )
         win_dicts = [self._get_win_dict(win) for win in wins]
         stringio = io.StringIO()
         csv_writer = csv.DictWriter(stringio, win_dicts[0].keys())
@@ -105,10 +111,25 @@ class CSVView(APIView):
             csv_writer.writerow(win_dict)
         return stringio.getvalue()
 
+    def _make_plain_csv(self, table):
+        """ Get CSV of table """
+
+        stringio = io.StringIO()
+        cursor = connection.cursor()
+        cursor.execute("select * from wins_{};".format(table))
+        csv_writer = csv.writer(stringio)
+        header = [i[0] for i in cursor.description]
+        csv_writer.writerow(header)
+        csv_writer.writerows(cursor)
+        return stringio.getvalue()
+
     def get(self, request, format=None):
         bytesio = io.BytesIO()
         zf = zipfile.ZipFile(bytesio, 'w')
-        csv_str = self._make_csv()
-        zf.writestr('wins.csv', csv_str)
+        for table in ['win', 'customerresponse', 'notification', 'advisor']:
+            csv_str = self._make_plain_csv(table)
+            zf.writestr(table + 's.csv', csv_str)
+        full_csv_str = self._make_csv()
+        zf.writestr('wins_complete.csv', full_csv_str)
         zf.close()
         return HttpResponse(bytesio.getvalue())
