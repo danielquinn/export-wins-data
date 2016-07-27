@@ -1,5 +1,6 @@
 import collections
 import csv
+import functools
 import io
 import zipfile
 from operator import attrgetter
@@ -49,6 +50,7 @@ class CSVView(APIView):
 
         return retval
 
+    @functools.lru_cache(None)
     def _get_win_field(self, name):
         """ Get field specified in Win model """
 
@@ -56,14 +58,14 @@ class CSVView(APIView):
             filter(lambda field: field.name == name, Win._meta.fields)
         )
 
-    def _get_win_dict(self, win):
+    def _get_win_dict(self, win, fields):
         """ Take Win instance, return ordered dict of {name -> value} """
 
         # want consistent ordering so CSVs are always same format
         win_dict = collections.OrderedDict()
 
         # local fields
-        for field_name in WinSerializer().fields:
+        for field_name in fields:
             model_field = self._get_win_field(field_name)
             if model_field.choices:
                 display_fn = getattr(
@@ -99,18 +101,21 @@ class CSVView(APIView):
 
         wins = Win.objects.all(
         ).select_related(
-            'user',
+            'user__id',
+            'user__email',
         ).prefetch_related(
             'advisors',
-            'notifications',
+            'breakdowns',
             'confirmation',
+            'notifications',
         ).exclude(
             user__email__in=[
                 'adam.malinowski@digital.bis.gov.uk',
                 'daniel.quinn@digital.bis.gov.uk',
             ]
         )
-        win_dicts = [self._get_win_dict(win) for win in wins]
+        fields = WinSerializer().fields  # cache this for speed
+        win_dicts = [self._get_win_dict(win, fields) for win in wins]
         stringio = io.StringIO()
         csv_writer = csv.DictWriter(stringio, win_dicts[0].keys())
         csv_writer.writeheader()
