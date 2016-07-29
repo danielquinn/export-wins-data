@@ -3,6 +3,7 @@ import bz2
 import csv
 import os
 import random
+import textwrap
 import time
 
 from django.conf import settings
@@ -95,39 +96,38 @@ class Command(BaseCommand):
 
     @staticmethod
     def send(email, password):
-        """
-        This should probably be generated from a template, but this isn't a
-        permanent use thing so I didn't bother.
-        """
+        subject = "Export Wins Login Credentials"
+        body = """Dear Colleague,
+
+This email contains your login credentials for the new Export Wins service.
+
+This service is being developed with feedback from live user testing. It is delivered in two parts: the first part should be completed online by the Lead Officer in UKTI or FCO who has helped the Customer deliver the win. In the second part, the Customer will be sent an email, inviting them to confirm the Export Win.
+
+The service can be accessed by copying and pasting the address below into your internet browser, or by clicking on this link: https://www.exportwins.ukti.gov.uk/
+
+You should login using these credentials:
+
+Email: {}
+Password: {}
+
+If you experience a problem accessing or completing the form using the link above, please contact us by using the feedback button in the service or by email at:
+
+  Email: exportwins@ukti.gsi.gov.uk
+  Subject: Export Wins Feedback
+
+To access top tips for lead officers, a webinar recording, screenshots, guidance and FAQs please click on this link: https://ukticonnect.sharepoint.com/trade/performance/Pages/Business-Wins.aspx
+
+Best Regards,
+
+The UKTI Digital Team
+            """.format(email, password)
+        body = textwrap.dedent(body)
 
         send_mail(
-            "Export Wins Login Credentials",
-            "Dear Colleague\n\nThank you for agreeing to test the new "
-            "Export Wins service.\n\nThis service is being developed with "
-            "feedback from live user testing. It will be delivered in two "
-            "parts: the first part is to be completed online by the Lead "
-            "Officer in UKTI or FCO who has helped the Customer deliver "
-            "the win. In the second part, the Customer will be sent an "
-            "email, inviting them to confirm the Export Win.\n\nInitially "
-            "we are only testing the functionality the first part of this "
-            "process. Your team will have the opportunity to comment on "
-            "the process that enables customers to confirm Export Wins "
-            "before we begin testing that part.\n\nThe service can be "
-            "accessed by copying and pasting the address below into your "
-            "internet browser, or by clicking on this link:\n\n  "
-            "https://www.exportwins.ukti.gov.uk/\n\n"
-            "You should login using these credentials:\n\n  Email: {}\n  "
-            "Password: {}\n\nIf you experience a problem accessing or "
-            "completing the form using the link above, please contact us "
-            "by email using the feedback button in the service or at:"
-            "\n\n  Email: exportwins@ukti.gsi.gov.uk\n  Subject: Export "
-            "Wins Feedback\n\nBest Regards\n\n"
-            "The UKTI Digital Team".format(
-                email,
-                password
-            ),
+            subject,
+            body,
             settings.SENDING_ADDRESS,
-            (email,)
+            (email,),
         )
 
         time.sleep(1)
