@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from ..constants import BREAKDOWN_TYPES
 from ..models import CustomerResponse, Win
-from ..serializers import WinSerializer
+from ..serializers import CustomerResponseSerializer, WinSerializer
 from users .models import User
 
 
@@ -21,6 +21,9 @@ class CSVView(APIView):
     """ Endpoint returning CSV of all Win data, with foreign keys flattened """
 
     permission_classes = (permissions.IsAdminUser,)
+    # cache for speed
+    win_fields = WinSerializer().fields
+    customerresponse_fields = CustomerResponseSerializer().fields
 
     def _extract_breakdowns(self, win):
         """ Return list of 10 tuples, 5 for export, 5 for non-export """
@@ -51,22 +54,56 @@ class CSVView(APIView):
 
         return retval
 
+    def _confirmation(self, win):
+        """ Add fields for confirmation """
+
+        if hasattr(win, 'confirmation'):
+            confirmation = win.confirmation
+        else:
+            confirmation = None
+
+        values = [('customer response recieved', bool(confirmation))]
+        for field_name in self.customerresponse_fields:
+            if field_name in ['win', 'created']:
+                continue
+            model_field = self._get_customerresponse_field(field_name)
+            if confirmation:
+                if model_field.choices:
+                    display_fn = getattr(
+                        confirmation, "get_{0}_display".format(field_name)
+                    )
+                    value = display_fn()
+                else:
+                    value = getattr(confirmation, field_name)
+            else:
+                value = ''
+            model_field_name = model_field.verbose_name or model_field.name
+            values.append((model_field_name, str(value)))
+        return values
+
+    def _get_model_field(self, model, name):
+        return next(
+            filter(lambda field: field.name == name, model._meta.fields)
+        )
+
+    @functools.lru_cache(None)
+    def _get_customerresponse_field(self, name):
+        """ Get field specified in CustomerResponse model """
+        return self._get_model_field(CustomerResponse, name)
+
     @functools.lru_cache(None)
     def _get_win_field(self, name):
         """ Get field specified in Win model """
+        return self._get_model_field(Win, name)
 
-        return next(
-            filter(lambda field: field.name == name, Win._meta.fields)
-        )
-
-    def _get_win_dict(self, win, fields):
+    def _get_win_dict(self, win):
         """ Take Win instance, return ordered dict of {name -> value} """
 
         # want consistent ordering so CSVs are always same format
         win_dict = collections.OrderedDict()
 
         # local fields
-        for field_name in fields:
+        for field_name in self.win_fields:
             model_field = self._get_win_field(field_name)
             if model_field.choices:
                 display_fn = getattr(
@@ -83,17 +120,8 @@ class CSVView(APIView):
         win_dict['user'] = str(win.user)
         win_dict['advisors'] = ', '.join(map(str, win.advisors.all()))
         win_dict['notifications'] = bool(win.notifications.filter(type='c'))
-        try:
-            getattr(win, 'confirmation')
-            confirmed = True  # just record if customer has responded for now
-            # if response.agree_with_win is None:
-            #     confirmed = 'N/A'
-            # else:
-            #     confirmed = response.agree_with_win
-        except CustomerResponse.DoesNotExist:
-            confirmed = False
-        win_dict['confirmation'] = confirmed
         win_dict.update(self._extract_breakdowns(win))
+        win_dict.update(self._confirmation(win))
 
         return win_dict
 
@@ -115,8 +143,7 @@ class CSVView(APIView):
                 'daniel.quinn@digital.bis.gov.uk',
             ]
         )
-        fields = WinSerializer().fields  # cache this for speed
-        win_dicts = [self._get_win_dict(win, fields) for win in wins]
+        win_dicts = [self._get_win_dict(win) for win in wins]
         stringio = io.StringIO()
         csv_writer = csv.DictWriter(stringio, win_dicts[0].keys())
         csv_writer.writeheader()

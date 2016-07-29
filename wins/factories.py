@@ -78,26 +78,27 @@ class CustomerResponseFactory(factory.DjangoModelFactory):
         model = CustomerResponse
 
     our_support = 1
-    access_to_contacts = 1
-    access_to_information = 1
-    improved_profile = 1
-    gained_confidence = 1
+    access_to_contacts = 2
+    access_to_information = 3
+    improved_profile = 4
+    gained_confidence = 5
     developed_relationships = 1
-    overcame_problem = 1
+    overcame_problem = 2
 
     involved_state_enterprise = True
-    interventions_were_prerequisite = True
+    interventions_were_prerequisite = False
     support_improved_speed = True
-    expected_portion_without_help = 1
-    last_export = 1
-    company_was_at_risk_of_not_exporting = True
+    expected_portion_without_help = 6
+    last_export = 2
+    company_was_at_risk_of_not_exporting = False
     has_explicit_export_plans = True
-    has_enabled_expansion_into_new_market = True
+    has_enabled_expansion_into_new_market = False
     has_increased_exports_as_percent_of_turnover = True
-    has_enabled_expansion_into_existing_market = True
-    case_study_willing = True
-
+    has_enabled_expansion_into_existing_market = False
+    agree_with_win = True
+    case_study_willing = False
     name = 'Cakes'
+    comments = 'Good work'
 
 
 class NotificationFactory(factory.DjangoModelFactory):
