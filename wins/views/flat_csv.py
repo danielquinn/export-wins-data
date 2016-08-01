@@ -118,7 +118,9 @@ class CSVView(APIView):
 
         # remote fields
         win_dict['user'] = str(win.user)
-        win_dict['advisors'] = ', '.join(map(str, win.advisors.all()))
+        win_dict['contributing advisors/team'] = (
+            ', '.join(map(str, win.advisors.all()))
+        )
         win_dict['notifications'] = bool(win.notifications.filter(type='c'))
         win_dict.update(self._extract_breakdowns(win))
         win_dict.update(self._confirmation(win))
@@ -179,9 +181,9 @@ class CSVView(APIView):
     def get(self, request, format=None):
         bytesio = io.BytesIO()
         zf = zipfile.ZipFile(bytesio, 'w')
-        for table in ['win', 'customerresponse', 'notification', 'advisor']:
-            csv_str = self._make_plain_csv(table)
-            zf.writestr(table + 's.csv', csv_str)
+        # for table in ['win', 'customerresponse', 'notification', 'advisor']:
+        #     csv_str = self._make_plain_csv(table)
+        #     zf.writestr(table + 's.csv', csv_str)
         full_csv_str = self._make_flat_wins_csv()
         zf.writestr('wins_complete.csv', full_csv_str)
         user_csv_str = self._make_user_csv()
