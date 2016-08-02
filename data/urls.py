@@ -14,7 +14,6 @@ router.register(r"limited-wins", LimitedWinViewSet, base_name="limited-win")
 router.register(r"confirmations", ConfirmationViewSet)
 router.register(r"breakdowns", BreakdownViewSet)
 router.register(r"advisors", AdvisorViewSet)
-# router.register(r"notifications", NotificationViewSet)
 
 urlpatterns = [
 
