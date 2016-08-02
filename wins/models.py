@@ -324,12 +324,3 @@ class Notification(models.Model):
             self.win.id,
             self.created
         )
-
-    @classmethod
-    def send(cls, win, recipient):
-        cls.objects.create(win=win, recipient=recipient)
-        if self.type == self.TYPE_OFFICER:
-            return "Officer notification to {} regarding Win {} sent {}".format(
-                self.recipient, self.win.id, self.created)
-        return "Customer notification to {} regarding Win {} sent {}".format(
-            self.recipient, self.win.id, self.created)
