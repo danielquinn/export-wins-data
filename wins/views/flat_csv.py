@@ -134,7 +134,7 @@ class CSVView(APIView):
         win_dict['contributing advisors/team'] = (
             ', '.join(map(str, win.advisors.all()))
         )
-        win_dict['notifications'] = self._val_to_str(
+        win_dict['customer email sent'] = self._val_to_str(
             bool(win.notifications.filter(type='c'))
         )
         win_dict.update(self._extract_breakdowns(win))
