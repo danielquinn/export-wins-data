@@ -62,7 +62,10 @@ class CSVView(APIView):
         else:
             confirmation = None
 
-        values = [('customer response recieved', bool(confirmation))]
+        values = [
+            ('customer response recieved',
+             self._val_to_str(bool(confirmation)))
+        ]
         for field_name in self.customerresponse_fields:
             if field_name in ['win', 'created']:
                 continue
@@ -78,7 +81,7 @@ class CSVView(APIView):
             else:
                 value = ''
             model_field_name = model_field.verbose_name or model_field.name
-            values.append((model_field_name, str(value)))
+            values.append((model_field_name, self._val_to_str(value)))
         return values
 
     def _get_model_field(self, model, name):
@@ -95,6 +98,16 @@ class CSVView(APIView):
     def _get_win_field(self, name):
         """ Get field specified in Win model """
         return self._get_model_field(Win, name)
+
+    def _val_to_str(self, val):
+        if val is True:
+            return 'Yes'
+        elif val is False:
+            return 'No'
+        elif val is None:
+            return ''
+        else:
+            return str(val)
 
     def _get_win_dict(self, win):
         """ Take Win instance, return ordered dict of {name -> value} """
@@ -114,14 +127,16 @@ class CSVView(APIView):
                 value = getattr(win, field_name)
 
             model_field_name = model_field.verbose_name or model_field.name
-            win_dict[model_field_name] = str(value)
+            win_dict[model_field_name] = self._val_to_str(value)
 
         # remote fields
         win_dict['user'] = str(win.user)
         win_dict['contributing advisors/team'] = (
             ', '.join(map(str, win.advisors.all()))
         )
-        win_dict['notifications'] = bool(win.notifications.filter(type='c'))
+        win_dict['customer email sent'] = self._val_to_str(
+            bool(win.notifications.filter(type='c'))
+        )
         win_dict.update(self._extract_breakdowns(win))
         win_dict.update(self._confirmation(win))
 
