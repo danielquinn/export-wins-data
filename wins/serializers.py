@@ -85,6 +85,7 @@ class BreakdownSerializer(ModelSerializer):
     class Meta(object):
         model = Breakdown
         fields = (
+            "id",
             "win",
             "type",
             "year",

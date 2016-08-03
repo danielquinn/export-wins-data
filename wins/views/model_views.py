@@ -111,8 +111,9 @@ class BreakdownViewSet(AliceMixin, ModelViewSet):
     serializer_class = BreakdownSerializer
     pagination_class = StandardPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_fields = ('win__id',)
     ordering_fields = ("pk",)
-    http_method_names = ("get", "post")
+    http_method_names = ("get", "post", "patch", "put", "delete")
 
 
 class AdvisorViewSet(AliceMixin, ModelViewSet):
@@ -124,4 +125,4 @@ class AdvisorViewSet(AliceMixin, ModelViewSet):
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filter_fields = ('win__id',)
     ordering_fields = ("pk",)
-    http_method_names = ("get", "post")
+    http_method_names = ("get", "post", "patch", "put", "delete")
