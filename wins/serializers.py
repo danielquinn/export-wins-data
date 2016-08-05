@@ -76,28 +76,108 @@ class WinSerializer(ModelSerializer):
         return self.context["request"].user
 
 
+class ChoicesSerializerField(SerializerMethodField):
+    """ Read-only field return representation of model field with choices
+
+    http://stackoverflow.com/questions/28945327/django-rest-framework-with-choicefield
+
+    """
+    def to_representation(self, value):
+        method_name = 'get_{}_display'.format(self.field_name)
+        method = getattr(value, method_name)
+        return method()
+
+
 class LimitedWinSerializer(ModelSerializer):
 
     id = CharField(read_only=True)
-    type = CharField(source="get_type_display")
-    country = CharField(source="country.name")
-    customer_location = CharField(source="get_customer_location_display")
-    goods_vs_services = CharField(source="get_goods_vs_services_display")
+    type = ChoicesSerializerField()
+    country = ChoicesSerializerField()
+    customer_location = ChoicesSerializerField()
+    goods_vs_services = ChoicesSerializerField()
+    sector = ChoicesSerializerField()
+    hvo_programme = ChoicesSerializerField()
+    type_of_support_1 = ChoicesSerializerField()
+    type_of_support_2 = ChoicesSerializerField()
+    type_of_support_3 = ChoicesSerializerField()
+    associated_programme_1 = ChoicesSerializerField()
+    associated_programme_2 = ChoicesSerializerField()
+    associated_programme_3 = ChoicesSerializerField()
+    team_type = ChoicesSerializerField()
+    hq_team = ChoicesSerializerField()
+    breakdowns = SerializerMethodField()  # prob should be breakdownserializer
+    advisors = SerializerMethodField()  # prob should be advisorserializer
 
     class Meta(object):
         model = Win
         fields = (
             "id",
+            "company_name",
+            "cdms_reference",
+            "customer_name",
+            "customer_job_title",
+            "customer_email_address",
+            "customer_location",
+            "business_type",
             "description",
-            "type",
+            "name_of_customer",
+            "name_of_export",
             "date",
             "country",
-            "customer_location",
+            "type",
             "total_expected_export_value",
             "total_expected_non_export_value",
             "goods_vs_services",
+            "sector",
+            "is_prosperity_fund_related",
+            "hvo_programme",
+            "has_hvo_specialist_involvement",
+            "is_e_exported",
+            "type_of_support_1",
+            "type_of_support_2",
+            "type_of_support_3",
+            "associated_programme_1",
+            "associated_programme_2",
+            "associated_programme_3",
+            "is_personally_confirmed",
+            "is_line_manager_confirmed",
+            "lead_officer_name",
+            "lead_officer_email_address",
+            "other_official_email_address",
+            "line_manager_name",
+            "team_type",
+            "hq_team",
+            "location",
             "created",
+            "updated",
+            "complete",
+            "breakdowns",
+            "advisors",
         )
+
+    def get_breakdowns(self, win):
+        """ Should use breakdownserializer probably """
+
+        exports = win.breakdowns.filter(type=1).order_by('year')
+        exports = [{'value': b.value, 'year': b.year} for b in exports]
+        nonexports = win.breakdowns.filter(type=2).order_by('year')
+        nonexports = [{'value': b.value, 'year': b.year} for b in nonexports]
+        return {
+            'exports': exports,
+            'nonexports': nonexports,
+        }
+
+    def get_advisors(self, win):
+        """ Should use advisorserializer probably """
+        return [
+            {
+                'name': a.name,
+                'team_type': a.get_team_type_display(),
+                'hq_team': a.get_hq_team_display(),
+                'location': a.location,
+            }
+            for a in win.advisors.all()
+        ]
 
 
 class BreakdownSerializer(ModelSerializer):
