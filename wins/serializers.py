@@ -1,6 +1,7 @@
 from rest_framework.serializers import (
     CharField, ModelSerializer, SerializerMethodField
 )
+from .constants import WITH_OUR_SUPPORT
 from .models import Win, Breakdown, Advisor, CustomerResponse
 
 
@@ -9,6 +10,7 @@ class WinSerializer(ModelSerializer):
     id = CharField(read_only=True)
     responded = SerializerMethodField()
     sent = SerializerMethodField()
+    country_name = SerializerMethodField()
 
     class Meta(object):
         model = Win
@@ -56,14 +58,18 @@ class WinSerializer(ModelSerializer):
             "complete",
             "responded",
             "sent",
+            "country_name",
         )
+
+    def _our_help(self, conf):
+        return dict(WITH_OUR_SUPPORT)[conf.expected_portion_without_help]
 
     def get_responded(self, win):
         if not hasattr(win, 'confirmation'):
             return None
         return {
             'created': win.confirmation.created,
-            'without_our_help': win.confirmation.get_expected_portion_without_help_display(),
+            'our_help': self._our_help(win.confirmation),
         }
 
     def get_sent(self, win):
@@ -71,6 +77,9 @@ class WinSerializer(ModelSerializer):
         if not notifications:
             return []
         return [n.created for n in notifications]
+
+    def get_country_name(self, win):
+        return win.get_country_display()
 
     def validate_user(self, value):
         return self.context["request"].user

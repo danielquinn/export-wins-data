@@ -755,6 +755,17 @@ WITHOUT_OUR_SUPPORT = (
     (7, "Would have achieved all of the export value without your support, the value would have been similar"),
 )
 
+# opposite of above for display to officers
+WITH_OUR_SUPPORT = (
+  (1, '100%',),
+  (2, '80-99%',),
+  (3, '60-79%',),
+  (4, '40-59%',),
+  (5, '20-39%',),
+  (6, '1-19%',),
+  (7, '0%',),
+)
+
 # This is redundant, going 1:1 with HQ_TEAM_REGION_OR_POST above
 UK_REGIONS = (
     (1, "East Midlands"),
