@@ -8,6 +8,7 @@ class WinSerializer(ModelSerializer):
 
     id = CharField(read_only=True)
     responded = SerializerMethodField()
+    sent = SerializerMethodField()
 
     class Meta(object):
         model = Win
@@ -51,12 +52,25 @@ class WinSerializer(ModelSerializer):
             "hq_team",
             "location",
             "created",
+            "updated",
             "complete",
             "responded",
+            "sent",
         )
 
     def get_responded(self, win):
-        return bool(hasattr(win, 'confirmation'))
+        if not hasattr(win, 'confirmation'):
+            return None
+        return {
+            'created': win.confirmation.created,
+            'without_our_help': win.confirmation.get_expected_portion_without_help_display(),
+        }
+
+    def get_sent(self, win):
+        notifications = win.notifications.filter(type='c').order_by('created')
+        if not notifications:
+            return []
+        return [n.created for n in notifications]
 
     def validate_user(self, value):
         return self.context["request"].user
