@@ -1,11 +1,13 @@
-from rest_framework.serializers import ModelSerializer, CharField
-
+from rest_framework.serializers import (
+    CharField, ModelSerializer, SerializerMethodField
+)
 from .models import Win, Breakdown, Advisor, CustomerResponse
 
 
 class WinSerializer(ModelSerializer):
 
     id = CharField(read_only=True)
+    responded = SerializerMethodField()
 
     class Meta(object):
         model = Win
@@ -50,7 +52,11 @@ class WinSerializer(ModelSerializer):
             "location",
             "created",
             "complete",
+            "responded",
         )
+
+    def get_responded(self, win):
+        return bool(hasattr(win, 'confirmation'))
 
     def validate_user(self, value):
         return self.context["request"].user
