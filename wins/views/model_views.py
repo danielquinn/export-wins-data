@@ -10,7 +10,7 @@ from ..filters import CustomerResponseFilterSet
 from ..models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from ..serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
-    AdvisorSerializer, CustomerResponseSerializer
+    AdvisorSerializer, CustomerResponseSerializer, DetailWinSerializer
 )
 from alice.views import AliceMixin
 
@@ -77,6 +77,13 @@ class LimitedWinViewSet(WinViewSet):
             pk=self.kwargs["pk"],
             confirmation__isnull=True
         )
+
+
+class DetailsWinViewSet(WinViewSet):
+
+    serializer_class = DetailWinSerializer
+    permission_classes = (AllowAny,)
+    http_method_names = ("get",)
 
 
 class ConfirmationViewSet(ModelViewSet):

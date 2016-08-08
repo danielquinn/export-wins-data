@@ -8,4 +8,5 @@ from .model_views import (
     ConfirmationViewSet,
     BreakdownViewSet,
     AdvisorViewSet,
+    DetailsWinViewSet,
 )

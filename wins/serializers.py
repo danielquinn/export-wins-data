@@ -104,6 +104,30 @@ class LimitedWinSerializer(ModelSerializer):
     country = ChoicesSerializerField()
     customer_location = ChoicesSerializerField()
     goods_vs_services = ChoicesSerializerField()
+
+    class Meta(object):
+        model = Win
+        fields = (
+            "id",
+            "description",
+            "type",
+            "date",
+            "country",
+            "customer_location",
+            "total_expected_export_value",
+            "total_expected_non_export_value",
+            "goods_vs_services",
+            "created",
+        )
+
+
+class DetailWinSerializer(ModelSerializer):
+
+    id = CharField(read_only=True)
+    type = ChoicesSerializerField()
+    country = ChoicesSerializerField()
+    customer_location = ChoicesSerializerField()
+    goods_vs_services = ChoicesSerializerField()
     sector = ChoicesSerializerField()
     hvo_programme = ChoicesSerializerField()
     type_of_support_1 = ChoicesSerializerField()
