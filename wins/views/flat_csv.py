@@ -67,7 +67,7 @@ class CSVView(APIView):
              self._val_to_str(bool(confirmation)))
         ]
         for field_name in self.customerresponse_fields:
-            if field_name in ['win', 'created']:
+            if field_name in ['win']:
                 continue
             model_field = self._get_customerresponse_field(field_name)
             if confirmation:
@@ -81,7 +81,11 @@ class CSVView(APIView):
             else:
                 value = ''
             model_field_name = model_field.verbose_name or model_field.name
-            values.append((model_field_name, self._val_to_str(value)))
+            if model_field_name == 'created':
+                csv_field_name = 'date response received'
+            else:
+                csv_field_name = model_field_name
+            values.append((csv_field_name, self._val_to_str(value)))
         return values
 
     def _get_model_field(self, model, name):
