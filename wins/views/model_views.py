@@ -42,6 +42,14 @@ class WinViewSet(AliceMixin, ModelViewSet):
         if not instance.complete:
             return
 
+        notification_sent = Notification.objects.filter(
+            win=instance,
+            type=Notification.TYPE_CUSTOMER,
+        ).count()
+
+        if notification_sent:
+            return
+
         notification = Notification(
             win=instance,
             user=self.request.user,
