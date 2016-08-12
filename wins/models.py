@@ -174,6 +174,7 @@ class Breakdown(models.Model):
 
 
 class Advisor(models.Model):
+    """ Member of another team who helped with a Win """
 
     win = models.ForeignKey(Win, related_name="advisors")
     name = models.CharField(max_length=128)

@@ -26,6 +26,7 @@ class BigPagination(PageNumberPagination):
 
 
 class WinViewSet(AliceMixin, ModelViewSet):
+    """ For querying Wins and adding/editing """
 
     model = Win
     queryset = Win.objects.all()
@@ -69,6 +70,7 @@ class WinViewSet(AliceMixin, ModelViewSet):
 
 
 class LimitedWinViewSet(WinViewSet):
+    """ Limited view for customer response """
 
     serializer_class = LimitedWinSerializer
     permission_classes = (AllowAny,)
@@ -88,6 +90,7 @@ class LimitedWinViewSet(WinViewSet):
 
 
 class DetailsWinViewSet(WinViewSet):
+    """ Provides additional Win data for details view """
 
     serializer_class = DetailWinSerializer
     permission_classes = (AllowAny,)
