@@ -66,18 +66,19 @@ def generate_customer_email(url, win):
                         win.lead_officer_name
                     ),
         'body': body,
-        'from': settings.SENDING_ADDRESS,
+        'from': settings.FEEDBACK_ADDRESS,
         'to': (win.customer_email_address,),
     }
 
 
-def send_customer_email(request, win):
+def send_customer_email(win):
     """ Send mail to customer asking them to confirm a win
 
     Not currently used, instead manual process
 
     """
-    email_dict = generate_customer_email(request.POST.get("url"), win)
+    url = 'https://www.exportwins.ukti.gov.uk/wins/review/' + str(win.pk)
+    email_dict = generate_customer_email(url, win)
     send_mail(
         email_dict['subject'],
         email_dict['body'],

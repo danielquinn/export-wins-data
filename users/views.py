@@ -25,4 +25,4 @@ class LoginView(APIView):
 
         login(request, user)
 
-        return Response({'id': user.pk})
+        return Response({'id': user.pk, 'email': user.email})

@@ -122,6 +122,8 @@ class Win(models.Model):
     )
     location = models.CharField(max_length=128, blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    complete = models.BooleanField()
 
     def __str__(self):
         return "Export win {}: {} - {}".format(
@@ -172,6 +174,7 @@ class Breakdown(models.Model):
 
 
 class Advisor(models.Model):
+    """ Member of another team who helped with a Win """
 
     win = models.ForeignKey(Win, related_name="advisors")
     name = models.CharField(max_length=128)
@@ -237,16 +240,19 @@ class CustomerResponse(models.Model):
     involved_state_enterprise = models.BooleanField(
         verbose_name="Did the win involve a foreign government or state-owned "
                      "enterprise (e.g. as a customer, an intermediary or "
-                     "facilitator)?"
+                     "facilitator)?",
+        default=False
     )
     interventions_were_prerequisite = models.BooleanField(
         verbose_name="Was any of the support we provided a prerequisite for "
-                     "the export value to be realised?"
+                     "the export value to be realised?",
+        default=False
     )
     support_improved_speed = models.BooleanField(
         verbose_name="Did our support help you achieve "
                      "this win more quickly than you otherwise would have "
-                     "done?"
+                     "done?",
+        default=False
     )
     expected_portion_without_help = models.PositiveIntegerField(
         choices=constants.WITHOUT_OUR_SUPPORT,
@@ -259,22 +265,27 @@ class CustomerResponse(models.Model):
     )
     company_was_at_risk_of_not_exporting = models.BooleanField(
         verbose_name="Prior to securing this win, was your company at risk of "
-                     "stopping exporting?"
+                     "stopping exporting?",
+        default=False
     )
     has_explicit_export_plans = models.BooleanField(
         verbose_name="Beyond this win, do you have specific plans to export "
-                     "in the next 12 months?"
+                     "in the next 12 months?",
+        default=False
     )
     has_enabled_expansion_into_new_market = models.BooleanField(
-        verbose_name="Has this win enabled you to expand into a new market?"
+        verbose_name="Has this win enabled you to expand into a new market?",
+        default=False
     )
     has_increased_exports_as_percent_of_turnover = models.BooleanField(
         verbose_name="Has this win enabled you to increase exports as a % of "
-                     "your turnover?"
+                     "your turnover?",
+        default=False
     )
     has_enabled_expansion_into_existing_market = models.BooleanField(
         verbose_name="Has this win enabled you to maintain or expand in an "
-                     "existing market?"
+                     "existing market?",
+        default=False
     )
     # temporarily nullable for migration - should ultimately be filled in and
     # turned into a BooleanField
@@ -314,7 +325,3 @@ class Notification(models.Model):
             self.win.id,
             self.created
         )
-
-    @classmethod
-    def send(cls, win, recipient):
-        cls.objects.create(win=win, recipient=recipient)

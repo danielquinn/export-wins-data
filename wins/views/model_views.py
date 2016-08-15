@@ -10,7 +10,7 @@ from ..filters import CustomerResponseFilterSet
 from ..models import Win, Breakdown, Advisor, CustomerResponse, Notification
 from ..serializers import (
     WinSerializer, LimitedWinSerializer, BreakdownSerializer,
-    AdvisorSerializer, CustomerResponseSerializer, NotificationSerializer
+    AdvisorSerializer, CustomerResponseSerializer, DetailWinSerializer
 )
 from alice.views import AliceMixin
 
@@ -20,18 +20,57 @@ class StandardPagination(PageNumberPagination):
     page_size_query_param = "page-size"
 
 
+class BigPagination(PageNumberPagination):
+    page_size = 1000
+    page_size_query_param = "page-size"
+
+
 class WinViewSet(AliceMixin, ModelViewSet):
+    """ For querying Wins and adding/editing """
 
     model = Win
     queryset = Win.objects.all()
     serializer_class = WinSerializer
-    pagination_class = StandardPagination
+    pagination_class = BigPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_fields = ('id', 'user__id')
     ordering_fields = ("pk",)
-    http_method_names = ("get", "post")
+    http_method_names = ("get", "post", "put", "patch")
+
+    def _notify_if_complete(self, instance):
+        """ If the form is marked 'complete', email customer for response """
+
+        if not instance.complete:
+            return
+
+        notification_sent = Notification.objects.filter(
+            win=instance,
+            type=Notification.TYPE_CUSTOMER,
+        ).count()
+
+        if notification_sent:
+            return
+
+        notification = Notification(
+            win=instance,
+            user=self.request.user,
+            recipient=instance.customer_email_address,
+            type=Notification.TYPE_CUSTOMER,
+        )
+        notification.save()
+        notifications.send_customer_email(instance)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        self._notify_if_complete(instance)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        self._notify_if_complete(instance)
 
 
 class LimitedWinViewSet(WinViewSet):
+    """ Limited view for customer response """
 
     serializer_class = LimitedWinSerializer
     permission_classes = (AllowAny,)
@@ -50,23 +89,12 @@ class LimitedWinViewSet(WinViewSet):
         )
 
 
-class NotificationViewSet(ModelViewSet):
-    """ Endpoint to instruct data server to notify officer or customer """
+class DetailsWinViewSet(WinViewSet):
+    """ Provides additional Win data for details view """
 
-    model = Notification
-    queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    serializer_class = DetailWinSerializer
     permission_classes = (AllowAny,)
-    pagination_class = StandardPagination
-    http_method_names = ("post",)
-
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        if instance.type == Notification.TYPE_OFFICER:
-            notifications.send_intermediate_officer_email(instance.win)
-        # elif instance.type == Notification.TYPE_CUSTOMER:
-        #     notifications.send_customer_email(self.request, instance.win)
-        return instance
+    http_method_names = ("get",)
 
 
 class ConfirmationViewSet(ModelViewSet):
@@ -87,6 +115,8 @@ class ConfirmationViewSet(ModelViewSet):
             self.metadata_class().get_serializer_info(self.get_serializer()))
 
     def perform_create(self, serializer):
+        """ Send officer notification when customer responds """
+
         instance = serializer.save()
         notifications.send_officer_notification_of_customer_response(instance)
         return instance
@@ -99,8 +129,9 @@ class BreakdownViewSet(AliceMixin, ModelViewSet):
     serializer_class = BreakdownSerializer
     pagination_class = StandardPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_fields = ('win__id',)
     ordering_fields = ("pk",)
-    http_method_names = ("get", "post")
+    http_method_names = ("get", "post", "patch", "put", "delete")
 
 
 class AdvisorViewSet(AliceMixin, ModelViewSet):
@@ -110,5 +141,6 @@ class AdvisorViewSet(AliceMixin, ModelViewSet):
     serializer_class = AdvisorSerializer
     pagination_class = StandardPagination
     filter_backends = (DjangoFilterBackend, OrderingFilter)
+    filter_fields = ('win__id',)
     ordering_fields = ("pk",)
-    http_method_names = ("get", "post")
+    http_method_names = ("get", "post", "patch", "put", "delete")
