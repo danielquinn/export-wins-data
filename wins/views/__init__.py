@@ -5,8 +5,8 @@ from .model_views import (
     StandardPagination,
     WinViewSet,
     LimitedWinViewSet,
-    NotificationViewSet,
     ConfirmationViewSet,
     BreakdownViewSet,
     AdvisorViewSet,
+    DetailsWinViewSet,
 )

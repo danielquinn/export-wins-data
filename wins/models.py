@@ -122,6 +122,8 @@ class Win(models.Model):
     )
     location = models.CharField(max_length=128, blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    complete = models.BooleanField()
 
     def __str__(self):
         return "Export win {}: {} - {}".format(
@@ -172,6 +174,7 @@ class Breakdown(models.Model):
 
 
 class Advisor(models.Model):
+    """ Member of another team who helped with a Win """
 
     win = models.ForeignKey(Win, related_name="advisors")
     name = models.CharField(max_length=128)
@@ -322,7 +325,3 @@ class Notification(models.Model):
             self.win.id,
             self.created
         )
-
-    @classmethod
-    def send(cls, win, recipient):
-        cls.objects.create(win=win, recipient=recipient)
