@@ -7,7 +7,7 @@ from django.test import TestCase, Client, override_settings
 from rest_framework.authtoken.models import Token
 
 from ..factories import WinFactory
-from ..models import Breakdown, Notification
+from ..models import Breakdown
 from alice.tests.client import AliceClient
 from users.factories import UserFactory
 
@@ -30,10 +30,7 @@ class AlicePermissionTestCase(TestCase):
         self.wins_detail = reverse("drf:win-detail", kwargs={
             "pk": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
         })
-        self.notifications_list = reverse("drf:notification-list")
-        self.notifications_detail = reverse("drf:notification-detail", kwargs={
-            "pk": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
-        })
+
         self.customerresponses_schema = reverse("drf:customerresponse-schema")
         self.customerresponses_list = reverse("drf:customerresponse-list")
         self.customerresponses_detail = reverse("drf:customerresponse-detail", kwargs={
@@ -86,13 +83,6 @@ class AlicePermissionTestCase(TestCase):
           "name_of_customer": "name",
         }
 
-        self.NOTIFICATIONS_POST_SAMPLE = {
-            "win": str(self.win.pk),
-            "user": self.user.pk,
-            "recipient": "root@nowhere.ca",
-            "type": Notification.TYPE_OFFICER
-        }
-
         self.CUSTOMER_RESPONSES_POST_SAMPLE = {
             "win": str(self.win.pk),
             "name": "bob",
@@ -124,10 +114,6 @@ class AlicePermissionTestCase(TestCase):
 
     # GET Schema --------------------------------------------------------------
 
-    @override_settings(UI_SECRET=AliceClient.SECRET)
-    def test_get_notification_schema_not_allowed(self):
-        response = self.alice_client.get('/notification/schema/')
-        self.assertEqual(response.status_code, 404)
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_get_schema_pass(self, url, keys):
@@ -140,7 +126,7 @@ class AlicePermissionTestCase(TestCase):
     def test_win_schema_pass(self):
         self._test_get_schema_pass(
             self.wins_schema,
-            ['id', 'user', 'company_name', 'cdms_reference', 'cdms_reference'],
+            ['id', 'company_name', 'cdms_reference', 'cdms_reference'],
         )
 
     def test_customerresponse_schema_pass(self):
@@ -179,12 +165,6 @@ class AlicePermissionTestCase(TestCase):
         self._test_get_schema_fail_bad_client(self.advisors_schema)
 
     # GET List ----------------------------------------------------------------
-
-    @override_settings(UI_SECRET=AliceClient.SECRET)
-    def test_get_notification_list_not_allowed(self):
-        self._login(signed=True)
-        response = self.alice_client.get(self.notifications_list)
-        self.assertEqual(response.status_code, 405)
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_get_list_pass(self, url):
@@ -258,12 +238,6 @@ class AlicePermissionTestCase(TestCase):
         self._test_get_list_fail_bad_signature(self.advisors_list)
 
     # GET Detail --------------------------------------------------------------
-
-    @override_settings(UI_SECRET=AliceClient.SECRET)
-    def test_get_notification_detail_not_allowed(self):
-        self._login(signed=True)
-        response = self.alice_client.get(self.notifications_detail)
-        self.assertEqual(response.status_code, 405)
 
     @override_settings(UI_SECRET=AliceClient.SECRET)
     def _test_get_detail_pass(self, url):
@@ -348,12 +322,6 @@ class AlicePermissionTestCase(TestCase):
 
     def test_wins_post_pass(self):
         self._test_post_pass(self.wins_list, self.WINS_POST_SAMPLE)
-
-    def test_notifications_post_pass(self):
-        self._test_post_pass(
-            self.notifications_list,
-            self.NOTIFICATIONS_POST_SAMPLE,
-        )
 
     def test_customerresponses_post_pass(self):
         self._test_post_pass(
@@ -455,12 +423,6 @@ class AlicePermissionTestCase(TestCase):
             self.WINS_POST_SAMPLE,
         )
 
-    def test_notifications_post_fail_no_signature(self):
-        self._test_post_fail_no_signature(
-            self.notifications_list,
-            self.NOTIFICATIONS_POST_SAMPLE,
-        )
-
     def test_customerresponses_post_fail_no_signature(self):
         self._test_post_fail_no_signature(
             self.customerresponses_list,
@@ -492,12 +454,6 @@ class AlicePermissionTestCase(TestCase):
         self._test_post_fail_bad_signature(
             self.wins_list,
             self.WINS_POST_SAMPLE,
-        )
-
-    def test_notifications_post_fail_bad_signature(self):
-        self._test_post_fail_bad_signature(
-            self.notifications_list,
-            self.NOTIFICATIONS_POST_SAMPLE,
         )
 
     def test_customerresponses_post_fail_bad_signature(self):
@@ -532,13 +488,6 @@ class AlicePermissionTestCase(TestCase):
             self.wins_list,
             self.WINS_POST_SAMPLE,
             'customer_email_address',
-        )
-
-    def test_notifications_post_fail_no_data(self):
-        self._test_post_fail_no_data(
-            self.notifications_list,
-            self.NOTIFICATIONS_POST_SAMPLE,
-            'win',
         )
 
     def test_customerresponses_post_fail_no_data(self):
@@ -577,14 +526,6 @@ class AlicePermissionTestCase(TestCase):
             self.wins_list,
             self.WINS_POST_SAMPLE,
             'customer_email_address',
-            'Enter a valid email address.',
-        )
-
-    def test_notifications_post_fail_bad_data(self):
-        self._test_post_fail_bad_data(
-            self.notifications_list,
-            self.NOTIFICATIONS_POST_SAMPLE,
-            'recipient',
             'Enter a valid email address.',
         )
 

@@ -47,6 +47,7 @@ class WinFactory(factory.DjangoModelFactory):
     team_type = "team"
     hq_team = "team:1"
     location = "location"
+    complete = False
 
 
 WIN_TYPES_DICT = {y: x for x, y in WIN_TYPES}

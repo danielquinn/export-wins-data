@@ -24,6 +24,7 @@ class CSVView(APIView):
     # cache for speed
     win_fields = WinSerializer().fields
     customerresponse_fields = CustomerResponseSerializer().fields
+    IGNORE_FIELDS = ['responded', 'sent', 'country_name', 'updated', 'complete']
 
     def _extract_breakdowns(self, win):
         """ Return list of 10 tuples, 5 for export, 5 for non-export """
@@ -117,6 +118,8 @@ class CSVView(APIView):
 
         # local fields
         for field_name in self.win_fields:
+            if field_name in self.IGNORE_FIELDS:
+                continue
             model_field = self._get_win_field(field_name)
             if model_field.choices:
                 display_fn = getattr(

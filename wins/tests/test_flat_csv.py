@@ -103,6 +103,9 @@ class TestFlatCSV(TestCase):
 
     def _assert_about_win_dict(self, win_dict):
         for field_name in WinSerializer().fields:
+            if field_name in CSVView.IGNORE_FIELDS:
+                continue
+
             field = CSVView()._get_win_field(field_name)
             csv_name = field.verbose_name or field.name
             try:
