@@ -141,6 +141,7 @@ class DetailWinSerializer(ModelSerializer):
     breakdowns = SerializerMethodField()  # prob should be breakdownserializer
     advisors = SerializerMethodField()  # prob should be advisorserializer
     responded = SerializerMethodField()
+    sent = SerializerMethodField()
 
     class Meta(object):
         model = Win
@@ -188,6 +189,7 @@ class DetailWinSerializer(ModelSerializer):
             "breakdowns",
             "advisors",
             "responded",
+            "sent",
         )
 
     def get_breakdowns(self, win):
@@ -219,6 +221,13 @@ class DetailWinSerializer(ModelSerializer):
         if not hasattr(win, 'confirmation'):
             return None
         return {'created': win.confirmation.created}
+
+    def get_sent(self, win):
+        # should be abstracted better
+        notifications = win.notifications.filter(type='c').order_by('created')
+        if not notifications:
+            return []
+        return [n.created for n in notifications]
 
 
 class BreakdownSerializer(ModelSerializer):
