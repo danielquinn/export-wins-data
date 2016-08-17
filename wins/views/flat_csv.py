@@ -5,6 +5,7 @@ import io
 import zipfile
 from operator import attrgetter
 
+from django.conf import settings
 from django.db import connection
 from django.http import HttpResponse
 
@@ -40,9 +41,9 @@ class CSVView(APIView):
             # data may have no input for some years
             for index in range(5):
                 try:
-                    breakdown = "{0}: {1}k".format(
+                    breakdown = "{0}: {1:,}".format(
                         type_breakdowns[index].year,
-                        int(type_breakdowns[index].value / 1000),
+                        type_breakdowns[index].value,
                     )
                 except IndexError:
                     breakdown = None
@@ -129,6 +130,12 @@ class CSVView(APIView):
                 value = display_fn()
             else:
                 value = getattr(win, field_name)
+                comma_fields = [
+                    'total_expected_export_value',
+                    'total_expected_non_export_value',
+                ]
+                if field_name in comma_fields:
+                    value = "{:,}".format(value)
 
             model_field_name = model_field.verbose_name or model_field.name
             win_dict[model_field_name] = self._val_to_str(value)
@@ -159,10 +166,7 @@ class CSVView(APIView):
             'confirmation',
             'notifications',
         ).exclude(
-            user__email__in=[
-                'adam.malinowski@digital.bis.gov.uk',
-                'daniel.quinn@digital.bis.gov.uk',
-            ]
+            user__email__in=settings.IGNORE_USERS
         )
         win_dicts = [self._get_win_dict(win) for win in wins]
         stringio = io.StringIO()

@@ -27,9 +27,9 @@ class WinFactory(factory.DjangoModelFactory):
     date = datetime.datetime(2016, 5, 25)
     country = "CA"
 
-    total_expected_export_value = 1
+    total_expected_export_value = 100000
     goods_vs_services = 1
-    total_expected_non_export_value = 1
+    total_expected_non_export_value = 2300
 
     sector = 1
     is_prosperity_fund_related = True

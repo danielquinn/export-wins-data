@@ -164,6 +164,17 @@ EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 
 
+IGNORE_USERS = [
+    'adam.malinowski@digital.bis.gov.uk',
+    'daniel.quinn@digital.bis.gov.uk',
+    'mateusz.lapsa-malawski@digital.bis.gov.uk',
+    'paul.mccomb@ukti.gsi.gov.uk',
+    'rob.sommerville@digital.bis.gov.uk',
+    'christine.leaver@ukti.gsi.gov.uk',
+    'gino.golluccio@ukti.gsi.gov.uk',
+]
+
+
 # Sentry
 
 RAVEN_CONFIG = {

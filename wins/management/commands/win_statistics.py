@@ -19,10 +19,6 @@ from ...models import Win, CustomerResponse
 class Command(BaseCommand):
     """ Emails stats of Wins and Users to date (optional JSON) """
 
-    # A user attribute like should_be_ignored is probably better but this will
-    # do for now.
-    EXCLUDED_IDS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-
     def add_arguments(self, parser):
         parser.add_argument(
             "--json",
@@ -40,9 +36,9 @@ class Command(BaseCommand):
         wins = Win.objects.all()
         confirmations = CustomerResponse.objects.all()
         if not options["show_all"]:
-            wins = wins.exclude(user__pk__in=self.EXCLUDED_IDS)
+            wins = wins.exclude(user__email__in=settings.IGNORE_USERS)
             confirmations = confirmations.exclude(
-                win__user__pk__in=self.EXCLUDED_IDS)
+                win__user__email__in=settings.IGNORE_USERS)
 
         users = User.objects.all()
         one_week_ago = timezone.now() - relativedelta(weeks=1)
